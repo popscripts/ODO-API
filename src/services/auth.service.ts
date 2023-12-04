@@ -1,6 +1,6 @@
 import { db } from '@utils/db.server'
 import { hashPassword } from '@utils/auth.helper'
-import * as AuthType from '@customTypes//auth.type'
+import * as AuthType from '@customTypes/auth.type'
 
 export const register = async (registerData: AuthType.NewUser) => {
     const { openDayId, username, password } = registerData
@@ -92,14 +92,9 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
                             classroom: true,
                             title: true,
                             description: true,
-                            managedBy: {
-                                select: {
-                                    id: true,
-                                    username: true,
-                                    name: true
-                                }
-                            },
-                            status: true
+                            status: true,
+                            reservedAt: true,
+                            takenAt: true
                         }
                     },
                     Taken: {
@@ -109,14 +104,9 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
                             classroom: true,
                             title: true,
                             description: true,
-                            managedBy: {
-                                select: {
-                                    id: true,
-                                    username: true,
-                                    name: true
-                                }
-                            },
-                            status: true
+                            status: true,
+                            reservedAt: true,
+                            takenAt: true
                         }
                     }
                 }

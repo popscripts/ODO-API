@@ -35,7 +35,7 @@ export const classroomStatusVerification = async (
     }
 
     // Check if classroom is free and no classroom is taken by him
-    if (classroom?.status.name === 'free' && group?.Taken !== null) {
+    if (classroom?.status.name === 'free' && group?.Taken === null) {
         verified = true
     }
 

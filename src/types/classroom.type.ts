@@ -38,4 +38,14 @@ export type ShortClassroom = {
     title: string
     description: string
     status: Status
+    reservedAt: Date | null
+    takenAt: Date | null
+}
+
+export type ClassroomStatusEvent = Event & {
+    id: number
+    userId: number
+    accountType: string
+    status: string
+    prevStatus: string
 }

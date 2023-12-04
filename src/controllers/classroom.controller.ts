@@ -15,10 +15,8 @@ export const listClassrooms = async (
 ): Promise<Response> => {
     try {
         const token: string = request.cookies.JWT
-        const tokenData: Token = verifyToken(token, 'accessToken')
-        const classrooms: Classroom[] = await ClassroomService.listClassrooms(
-            tokenData.openDayId
-        )
+        const { openDayId }: Token = verifyToken(token, 'accessToken')
+        const classrooms: Classroom[] = await ClassroomService.listClassrooms(openDayId)
         return response.status(200).json({ result: classrooms, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -33,9 +31,10 @@ export const addClassroom = async (
     try {
         const { classroom, title, description, managedById } = request.body
         const token = request.cookies.JWT
-        const tokenData: Token = verifyToken(token, 'accessToken')
+        const { openDayId }: Token = verifyToken(token, 'accessToken')
+        await ClassroomService.addClassroom(openDayId, classroom, title, description, managedById)
         await ClassroomService.addClassroom(
-            tokenData.openDayId,
+            openDayId,
             classroom,
             title,
             description,
@@ -53,15 +52,8 @@ export const updateClassroom = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const editedClassroom = request.body
-        const id: number = request.body.id
-        await ClassroomService.updateClassroom(
-            id,
-            editedClassroom.classroom,
-            editedClassroom.title,
-            editedClassroom.description,
-            editedClassroom.managedById
-        )
+        const { id, classroom, title, description, managedById } = request.body
+        await ClassroomService.updateClassroom(id, classroom, title, description, managedById)
         return response.status(201).json(Callback.editClassroom)
     } catch (error: any) {
         logger.error(`500 | ${error}`)

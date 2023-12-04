@@ -59,3 +59,9 @@ export type Users = {
 export type PictureName = {
     pictureName: string | null
 }
+
+export type SocketUserData = {
+    id: number
+    username: string
+    accountType: string
+}
