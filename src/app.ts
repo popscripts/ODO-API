@@ -10,6 +10,7 @@ import fileUpload from 'express-fileupload'
 import { Server as httpServer } from 'http'
 import { Server } from 'socket.io'
 import { ioConnectionConfig, socketConfig } from '@config/socket'
+import { disconnectAllSockets } from '@services/socket.service'
 
 dotenv.config()
 
@@ -45,4 +46,5 @@ const server: httpServer = app.listen(PORT, () => {
 })
 
 const io: Server = socketConfig(server)
+disconnectAllSockets().then(() => logger.info('Disconnected all Sockets'))
 ioConnectionConfig(io)

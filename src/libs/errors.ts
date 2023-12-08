@@ -63,3 +63,13 @@ export const updatePersonalDataError = {
     result: 'Wystąpił błąd podczas zapisywania danych personalnych',
     error: 1
 }
+
+export const registerUserSocketError = {
+    result: 'Wystąpił błąd podczas rejestracji Socketu',
+    error: 1
+}
+
+export const updateUserSocketError = {
+    result: 'Wystąpił błąd podczas aktualizacji Socketu',
+    error: 1
+}
