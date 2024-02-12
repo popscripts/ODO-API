@@ -10,7 +10,7 @@ import fileUpload from 'express-fileupload'
 import { Server as httpServer } from 'http'
 import { Server } from 'socket.io'
 import { ioConnectionConfig, socketConfig } from '@config/socket'
-import { disconnectAllSockets } from '@services/socket.service'
+import { disconnectAllSocketHandler } from '@utils/socket.handler'
 
 dotenv.config()
 
@@ -37,14 +37,15 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(morganMiddleware)
 routerConfig(app)
-if (process.env.ODO_ENV === 'prod') {
-    cronConfig()
-}
+cronConfig()
 
 const server: httpServer = app.listen(PORT, () => {
     logger.info('Server started!')
 })
 
 const io: Server = socketConfig(server)
-disconnectAllSockets().then(() => logger.info('Disconnected all Sockets'))
+disconnectAllSocketHandler(io).then(() =>
+    logger.info('Disconnected all Sockets')
+)
+
 ioConnectionConfig(io)

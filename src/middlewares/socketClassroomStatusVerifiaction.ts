@@ -16,6 +16,10 @@ export const socketClassroomStatusVerification = async (
     const groupTaken: ShortClassroom | null | undefined = group?.Taken
     const groupReserved: ShortClassroom | null | undefined = group?.Reserved
 
+    if (!group) {
+        return false
+    }
+
     if (
         isAdmin(accountType) ||
         isClassroomManager(classroom?.managedBy?.id, userId)

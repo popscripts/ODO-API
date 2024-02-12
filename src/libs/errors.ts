@@ -73,3 +73,13 @@ export const updateUserSocketError = {
     result: 'Wystąpił błąd podczas aktualizacji Socketu',
     error: 1
 }
+
+export const cannotChangeClassroomStatusError = {
+    result: 'Nie można zmienić statusu klasy',
+    error: 1
+}
+
+export const changeClassroomStatusError = {
+    result: 'Wystąpił błąd podczas zmiany statusu klasy',
+    error: 1
+}

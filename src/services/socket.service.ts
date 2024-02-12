@@ -77,7 +77,7 @@ export const updateSocket = async (userId: number, newSocketId: string) => {
 }
 
 export const deleteSocket = async (id: string) => {
-    return db.socket.update({
+    return db.socket.updateMany({
         where: {
             id
         },

@@ -1,17 +1,10 @@
 import { Server as httpServer } from 'http'
 import { Event, Server, Socket } from 'socket.io'
-import {
-    roomHandler,
-    socketMiddlewareHandler,
-    statusHandler
-} from '@utils/socket.handler'
-import { logger } from '@config/logger'
-import { isSocketRegistered } from '@services/socket.service'
-import {
-    logOutSocket,
-    registerUserSocket
-} from '@controllers/socket.controller'
-import { SocketEnum } from '@libs/socketEnum'
+import { socketEventLogger } from '@utils/socket.handler'
+import * as SocketController from '@controllers/socket.controller'
+import { registerSocketMiddleware } from '@middlewares/socketEvents'
+import * as SocketEvents from '@middlewares/socketEvents'
+import { cannotChangeClassroomStatusError } from '@libs/errors'
 
 export const socketConfig = (server: httpServer): Server => {
     return new Server(server, {
@@ -23,31 +16,44 @@ export const socketConfig = (server: httpServer): Server => {
 
 export const ioConnectionConfig = (io: Server): void => {
     io.on('connection', (socket: Socket): void => {
-        logger.info(`User: ${socket.id} connected`)
-
-        socket.use(async (event: Event, next): Promise<void> => {
-            if (!(await isSocketRegistered(socket.id))) {
-                await registerUserSocket(socket, event[SocketEnum.EventData])
-                next()
-            }
-            next()
+        socket.use((event: Event, next: any) => {
+            socketEventLogger(event, socket, next)
         })
 
-        socket.use(socketMiddlewareHandler)
-        socket.on('joinRoom', (data, err) => roomHandler(socket, data, err))
-        socket.on('setClassroomStatus', (data, err) =>
-            statusHandler(io, data, err)
+        socket.use(
+            async (event: Event, next: any): Promise<void> =>
+                registerSocketMiddleware(event, io, socket, next)
         )
 
-        socket.on('logOut', () => logOutSocket(socket))
+        socket.on('joinRoom', (data, err) =>
+            SocketController.joinRoom(socket, data, err)
+        )
+        socket.on('changeClassroomStatus', async (data) => {
+            if (await SocketEvents.classroomStatusMiddleware(data)) {
+                await SocketController.changeClassroomStatus(io, data)
+            } else {
+                io.to(socket.id).emit(
+                    'errorHandler',
+                    cannotChangeClassroomStatusError.result
+                )
+            }
+        })
+
+        socket.on('send_message', (data) => {
+            io.to(data.message).emit('receive_message', 'test message')
+        })
+
+        socket.on('logOut', async (): Promise<void> => {
+            io.to(socket.id).emit('loginStatus', false)
+            await SocketController.logOutSocket(socket)
+        })
 
         socket.on('error', (error: Error): void => {
-            socket.emit('error_handler', error.message)
+            io.to(socket.id).emit('errorHandler', error.message)
         })
 
         socket.on('disconnect', async (): Promise<void> => {
-            await logOutSocket(socket)
-            logger.info(`User: ${socket.id} disconnected`)
+            await SocketController.logOutSocket(socket)
         })
     })
 }
