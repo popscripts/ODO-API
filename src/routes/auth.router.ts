@@ -42,11 +42,6 @@ authRouter.get('/logout', AuthController.logout)
 authRouter.get('/user', authorize, AuthController.user)
 
 /**
- * GET: JWT data
- */
-authRouter.get('/jwt', authorize, AuthController.jwt)
-
-/**
  * GET: List of all users
  * Allowed account types: admin
  */
