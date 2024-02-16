@@ -100,17 +100,6 @@ export const user = async (request: Request, response: Response) => {
     }
 }
 
-export const jwt = async (request: Request, response: Response) => {
-    try {
-        const token: string = request.cookies.JWT
-        const tokenData: Token = AuthHelper.verifyToken(token, 'accessToken')
-        return response.status(200).json({ result: tokenData, error: 0 })
-    } catch (error: any) {
-        logger.error(`500 | ${error}`)
-        return response.status(500).json(Error.responseError)
-    }
-}
-
 export const users = async (request: Request, response: Response) => {
     try {
         const token: string = request.cookies.JWT
