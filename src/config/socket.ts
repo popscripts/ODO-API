@@ -28,6 +28,7 @@ export const ioConnectionConfig = (io: Server): void => {
         socket.on('joinRoom', (data, err) =>
             SocketController.joinRoom(socket, data, err)
         )
+
         socket.on('changeClassroomStatus', async (data) => {
             if (await SocketEvents.classroomStatusMiddleware(data)) {
                 await SocketController.changeClassroomStatus(io, data)
@@ -39,6 +40,7 @@ export const ioConnectionConfig = (io: Server): void => {
             }
         })
 
+        // Just for development purpose
         socket.on('send_message', (data) => {
             io.to(data.message).emit('receive_message', 'test message')
         })
