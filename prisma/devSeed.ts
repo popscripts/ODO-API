@@ -15,7 +15,12 @@ const devSeed = async () => {
                     openDayId: user.openDayId,
                     username: user.username,
                     password: password,
-                    accountTypeId: user.accountType
+                    accountTypeId: user.accountType,
+                    Socket: {
+                        create: {
+                            id: faker.string.hexadecimal({ length: 8 })
+                        }
+                    }
                 }
             })
         })
@@ -36,14 +41,19 @@ const devSeed = async () => {
         })
     )
 
-    // Create admin account
+    // Create an admin account
     createAdminAccount().then((admin: NewUser) => {
         return db.user.create({
             data: {
                 openDayId: admin.openDayId,
                 username: admin.username,
                 password: admin.password,
-                accountTypeId: admin.accountType
+                accountTypeId: admin.accountType,
+                Socket: {
+                    create: {
+                        id: faker.string.hexadecimal({ length: 8 })
+                    }
+                }
             }
         })
     })

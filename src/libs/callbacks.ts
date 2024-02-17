@@ -97,3 +97,13 @@ export const updatePersonalData = {
     result: 'Pomyślnie ustawiono dane osobowe',
     error: 0
 }
+
+export const registerUserSocket = {
+    result: 'Socket pomyślnie zarejestrowany',
+    error: 0
+}
+
+export const updateUserSocket = {
+    result: 'Pomyślnie zaktualizowano',
+    error: 0
+}

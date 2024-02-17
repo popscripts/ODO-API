@@ -1,6 +1,7 @@
 import { db } from '@utils/db.server'
 import { hashPassword } from '@utils/auth.helper'
 import * as AuthType from '@customTypes/auth.type'
+import { faker } from '@faker-js/faker'
 
 export const register = async (registerData: AuthType.NewUser) => {
     const { openDayId, username, password } = registerData
@@ -9,7 +10,12 @@ export const register = async (registerData: AuthType.NewUser) => {
         data: {
             openDayId,
             username,
-            password: hashedPassword
+            password: hashedPassword,
+            Socket: {
+                create: {
+                    id: faker.string.hexadecimal({ length: 8 })
+                }
+            }
         }
     })
 }
