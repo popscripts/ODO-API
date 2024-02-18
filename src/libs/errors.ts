@@ -3,11 +3,6 @@ export const registerError = {
     error: 1
 }
 
-export const userDoesNotExist = {
-    result: 'Podany użytkownik nie istnieje',
-    error: 1
-}
-
 export const wrongPassword = {
     result: 'Podano błędny login lub hasło',
     error: 1,
@@ -31,11 +26,6 @@ export const responseError = {
 
 export const permissionError = {
     result: 'Brak uprawnień',
-    error: 1
-}
-
-export const classroomAlreadyFree = {
-    result: 'Klasa jest już wolna',
     error: 1
 }
 
@@ -69,17 +59,42 @@ export const registerUserSocketError = {
     error: 1
 }
 
-export const updateUserSocketError = {
-    result: 'Wystąpił błąd podczas aktualizacji Socketu',
-    error: 1
-}
-
-export const cannotChangeClassroomStatusError = {
-    result: 'Nie można zmienić statusu klasy',
-    error: 1
-}
-
 export const changeClassroomStatusError = {
     result: 'Wystąpił błąd podczas zmiany statusu klasy',
+    error: 1
+}
+
+export const getGroupsError = {
+    result: 'Wystąpił błąd podczas pobierania grup',
+    error: 1
+}
+
+export const getGroupError = {
+    result: 'Wystąpił błąd podczas pobierania danych o grupie',
+    error: 1
+}
+
+export const addGroupError = {
+    result: 'Wystąpił błąd podczas dodawania grupy',
+    error: 1
+}
+
+export const updateGroupError = {
+    result: 'Wystąpił błąd podczas edycji grupy',
+    error: 1
+}
+
+export const deleteGroupError = {
+    result: 'Wystąpił błąd podczas usuwania grupy',
+    error: 1
+}
+
+export const orderStatusVerificationError = {
+    result: 'Nie można zmienić statusu tego zamówienia',
+    error: 1
+}
+
+export const userIsNotAMemberOfGroupError = {
+    result: 'Użytkownik nie należy do podanej grupy',
     error: 1
 }
