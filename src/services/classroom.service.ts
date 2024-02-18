@@ -70,6 +70,9 @@ export const addClassroom = async (
             title,
             description,
             managedById
+        },
+        select: {
+            id: true
         }
     })
 }

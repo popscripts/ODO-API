@@ -7,9 +7,9 @@ import cookieParser from 'cookie-parser'
 import { cronConfig } from '@config/cron'
 import { logger, morganMiddleware } from '@config/logger'
 import fileUpload from 'express-fileupload'
-import { Server as httpServer } from 'http'
+import { Server as httpServer, createServer } from 'http'
 import { Server } from 'socket.io'
-import { ioConnectionConfig, socketConfig } from '@config/socket'
+import { ioConnectionConfig, createSocketServer } from '@config/socket'
 import { disconnectAllSocketHandler } from '@utils/socket.handler'
 
 dotenv.config()
@@ -21,8 +21,23 @@ if (!process.env.PORT) {
 
 const PORT: number = parseInt(process.env.PORT, 10)
 
+declare global {
+    namespace Express {
+        export interface Request {
+            io: Server
+        }
+
+        export interface Response {}
+    }
+}
+
 dbHealthCheck().then(() => {
     const app: Express = express()
+
+    const io: Server = createSocketServer()
+
+    ioConnectionConfig(app, io)
+
     app.use(cors())
     app.use(
         fileUpload({
@@ -32,20 +47,22 @@ dbHealthCheck().then(() => {
             }
         })
     )
+
     app.use(express.json())
     app.use(cookieParser())
     app.use(morganMiddleware)
     routerConfig(app)
     cronConfig()
 
-    const server: httpServer = app.listen(PORT, (): void => {
-        logger.info('Server started!')
-    })
+    const server: httpServer = createServer(app)
 
-    const io: Server = socketConfig(server)
+    io.attach(server)
+
     disconnectAllSocketHandler(io).then(() =>
         logger.info('Disconnected all Sockets')
     )
 
-    ioConnectionConfig(io)
+    server.listen(PORT, (): void => {
+        logger.info(`Server started on :${PORT}`)
+    })
 })

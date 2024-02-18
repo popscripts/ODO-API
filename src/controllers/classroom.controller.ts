@@ -4,10 +4,13 @@ import * as Error from '@libs/errors'
 import * as Callback from '@libs/callbacks'
 import * as AuthHelper from '@utils/auth.helper'
 import { setClassroomStatus } from '@utils/status.helper'
-import { Token } from '@customTypes/auth.type'
+import { Token, User } from '@customTypes/auth.type'
 import { verifyToken } from '@utils/auth.helper'
 import { logger } from '@config/logger'
-import { Classroom } from '@customTypes/classroom.type'
+import { Classroom, ClassroomStatusEvent } from '@customTypes/classroom.type'
+import { getUser } from '@services/auth.service'
+import { Server } from 'socket.io'
+import { getClassroom } from '@services/classroom.service'
 
 export const listClassrooms = async (
     request: Request,
@@ -16,7 +19,8 @@ export const listClassrooms = async (
     try {
         const token: string = request.cookies.JWT
         const { openDayId }: Token = verifyToken(token, 'accessToken')
-        const classrooms: Classroom[] = await ClassroomService.listClassrooms(openDayId)
+        const classrooms: Classroom[] =
+            await ClassroomService.listClassrooms(openDayId)
         return response.status(200).json({ result: classrooms, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -32,14 +36,17 @@ export const addClassroom = async (
         const { classroom, title, description, managedById } = request.body
         const token = request.cookies.JWT
         const { openDayId }: Token = verifyToken(token, 'accessToken')
-        await ClassroomService.addClassroom(openDayId, classroom, title, description, managedById)
-        await ClassroomService.addClassroom(
+
+        const { id } = await ClassroomService.addClassroom(
             openDayId,
             classroom,
             title,
             description,
             managedById
         )
+
+        await emitClassroom(request.io, id)
+
         return response.status(201).json(Callback.newClassroom)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -53,7 +60,16 @@ export const updateClassroom = async (
 ): Promise<Response> => {
     try {
         const { id, classroom, title, description, managedById } = request.body
-        await ClassroomService.updateClassroom(id, classroom, title, description, managedById)
+        await ClassroomService.updateClassroom(
+            id,
+            classroom,
+            title,
+            description,
+            managedById
+        )
+
+        await emitClassroom(request.io, id)
+
         return response.status(201).json(Callback.editClassroom)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -116,13 +132,70 @@ export const changeClassroomStatus = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const { id, status } = request.body
-        const token = request.cookies.JWT
-        const tokenData: Token = AuthHelper.verifyToken(token, 'accessToken')
-        await setClassroomStatus(id, status, tokenData.id)
+        const { id, status, prevStatus } = request.body
+
+        const tokenData: Token = AuthHelper.verifyToken(
+            request.cookies.JWT,
+            'accessToken'
+        )
+
+        const user: User | null = await getUser(tokenData.id)
+        await setClassroomStatus(id, status, user!.Group!.id)
+
+        const socketData: ClassroomStatusEvent = {
+            id,
+            status,
+            prevStatus,
+            userId: tokenData.id
+        }
+
+        await emitClassroomStatus(request.io, socketData)
+
         return response.status(201).json(Callback.changeStatus)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
-        return response.status(500).json(Error.responseError)
+        return response.status(500).json({ error: error })
+    }
+}
+
+const emitClassroomStatus = async (
+    io: Server,
+    data: ClassroomStatusEvent
+): Promise<void> => {
+    try {
+        const { id, status, prevStatus, userId } = data
+        const classroom: Classroom | null = await getClassroom(id)
+
+        io.emit('classroomStatus', {
+            prevStatus,
+            classroom
+        })
+
+        logger.log(
+            'socket',
+            `ClassroomID: ${id} | ${prevStatus} -> ${status} | UserID: ${userId}`
+        )
+    } catch (error: any) {
+        logger.log(
+            'socket',
+            `emitClassroomStatus ${error.message} | error: ${1}`
+        )
+    }
+}
+
+const emitClassroom = async (
+    io: Server,
+    classroomId: number
+): Promise<void> => {
+    try {
+        const classroom: Classroom | null = await getClassroom(classroomId)
+
+        io.emit('classroomUpdate', {
+            classroom
+        })
+
+        logger.log('socket', `Classroom ${classroomId} data emitted`)
+    } catch (error: any) {
+        logger.log('socket', `emitClassroom ${error.message} | error: ${1}`)
     }
 }

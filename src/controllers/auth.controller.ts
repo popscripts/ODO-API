@@ -11,8 +11,12 @@ import { LoginUser, Token, User, Users } from '@customTypes/auth.type'
 import { logger } from '@config/logger'
 import { Key } from '@customTypes/key.type'
 import { upload } from '@utils/file.helper'
+import { Server } from 'socket.io'
 
-export const register = async (request: Request, response: Response) => {
+export const register = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
         const { key, username, password } = request.body
         const keyData: Key | null = await KeyService.getKey(key)
@@ -36,7 +40,10 @@ export const register = async (request: Request, response: Response) => {
     }
 }
 
-export const login = async (request: Request, response: Response) => {
+export const login = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
         const { username, password } = request.body
         const user: LoginUser | null = await AuthService.login(username)
@@ -77,10 +84,14 @@ export const login = async (request: Request, response: Response) => {
     }
 }
 
-export const logout = (request: Request, response: Response) => {
+export const logout = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
         response.clearCookie('JWT')
         response.clearCookie('refreshToken')
+
         return response.status(200).json(Callback.logout)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -88,7 +99,10 @@ export const logout = (request: Request, response: Response) => {
     }
 }
 
-export const user = async (request: Request, response: Response) => {
+export const user = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
         const token: string = request.cookies.JWT
         const { id }: Token = verifyToken(token, 'accessToken')
@@ -100,7 +114,10 @@ export const user = async (request: Request, response: Response) => {
     }
 }
 
-export const users = async (request: Request, response: Response) => {
+export const users = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
         const token: string = request.cookies.JWT
         const { openDayId }: Token = verifyToken(token, 'accessToken')
@@ -112,11 +129,19 @@ export const users = async (request: Request, response: Response) => {
     }
 }
 
-export const editUser = async (request: Request, response: Response) => {
+export const editUser = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
-        const { id, username, accountType } = request.body
+        const { id, username, accountType, shouldLogout } = request.body
         const parsedAccountType = AccountTypes[accountType]
         await AuthService.editUser(id, username, parsedAccountType)
+
+        if (shouldLogout) {
+            await callLogout(request.io, id)
+        }
+
         return response.status(201).json(Callback.editUser)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -124,9 +149,13 @@ export const editUser = async (request: Request, response: Response) => {
     }
 }
 
-export const deleteUser = async (request: Request, response: Response) => {
+export const deleteUser = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
         const id: number = request.body.id
+        await callLogout(request.io, id)
         await AuthService.deleteUser(id)
         return response.status(200).json(Callback.deleteUser)
     } catch (error: any) {
@@ -135,7 +164,10 @@ export const deleteUser = async (request: Request, response: Response) => {
     }
 }
 
-export const restoreUser = async (request: Request, response: Response) => {
+export const restoreUser = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
         const id: number = request.body.id
         await AuthService.restoreUser(id)
@@ -146,7 +178,10 @@ export const restoreUser = async (request: Request, response: Response) => {
     }
 }
 
-export const usersByStatus = async (request: Request, response: Response) => {
+export const usersByStatus = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
         const token: string = request.cookies.JWT
         const tokenData: Token = verifyToken(token, 'accessToken')
@@ -165,7 +200,7 @@ export const usersByStatus = async (request: Request, response: Response) => {
 export const updateProfilePicture = async (
     request: Request,
     response: Response
-) => {
+): Promise<Response> => {
     try {
         const token: string = request.cookies.JWT
         const tokenData: Token = verifyToken(token, 'accessToken')
@@ -178,7 +213,10 @@ export const updateProfilePicture = async (
     }
 }
 
-export const getPicture = async (request: Request, response: Response) => {
+export const getPicture = async (
+    request: Request,
+    response: Response
+): Promise<void | Response> => {
     try {
         const pictureId: string = request.params.id
         return response
@@ -201,5 +239,19 @@ export const updatePersonalData = async (
     } catch (error: any) {
         logger.error(`500 | ${error}`)
         return response.status(500).json(Error.updatePersonalDataError)
+    }
+}
+
+const callLogout = async (io: Server, userId: number): Promise<void> => {
+    try {
+        const user: User | null = await AuthService.getUser(userId)
+        const socketId: string | undefined = user?.Socket?.id
+
+        if (socketId) {
+            io.to(socketId).emit('callLogout', true)
+            logger.log('socket', `callLogout emitted for userID: ${user?.id}`)
+        }
+    } catch (error: any) {
+        logger.log('socket', `callLogout ${error.message} | error: ${1}`)
     }
 }

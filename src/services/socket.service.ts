@@ -1,5 +1,5 @@
 import { db } from '@utils/db.server'
-import { UserSocket } from '@customTypes/socket.type'
+import { Socket } from '@customTypes/socket.type'
 import { faker } from '@faker-js/faker'
 
 export const createSocket = async (id: string, userId: number) => {
@@ -11,7 +11,7 @@ export const createSocket = async (id: string, userId: number) => {
     })
 }
 
-export const getSocket = async (id: string): Promise<UserSocket | null> => {
+export const getSocket = async (id: string): Promise<Socket | null> => {
     return db.socket.findUnique({
         where: {
             id
@@ -24,14 +24,15 @@ export const getSocket = async (id: string): Promise<UserSocket | null> => {
                     username: true,
                     name: true
                 }
-            }
+            },
+            connected: true
         }
     })
 }
 
 export const getSocketByUserId = async (
     userId: number
-): Promise<UserSocket | null> => {
+): Promise<Socket | null> => {
     return db.socket.findUnique({
         where: {
             userId
@@ -44,12 +45,13 @@ export const getSocketByUserId = async (
                     username: true,
                     name: true
                 }
-            }
+            },
+            connected: true
         }
     })
 }
 
-export const getSockets = async (): Promise<UserSocket[] | null> => {
+export const getSockets = async (): Promise<Socket[] | null> => {
     return db.socket.findMany({
         select: {
             id: true,
@@ -59,7 +61,8 @@ export const getSockets = async (): Promise<UserSocket[] | null> => {
                     username: true,
                     name: true
                 }
-            }
+            },
+            connected: true
         }
     })
 }
@@ -97,11 +100,4 @@ export const isSocketRegistered = async (id: string): Promise<boolean> => {
     })
 
     return !!isRegistered
-}
-
-export const disconnectAllSockets = async (): Promise<void> => {
-    let sockets: UserSocket[] | null = await getSockets()
-    sockets?.forEach((socket: UserSocket): void => {
-        deleteSocket(socket?.id)
-    })
 }
