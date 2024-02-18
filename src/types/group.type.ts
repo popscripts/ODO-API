@@ -3,6 +3,7 @@ import { ShortUser } from '@customTypes/auth.type'
 
 export type Group = {
     id: number
+    openDayId: number
     groupSize: number | null
     GroupMembers: ShortUser[] | null
     description: string | null

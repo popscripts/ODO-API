@@ -103,7 +103,17 @@ export const registerUserSocket = {
     error: 0
 }
 
-export const updateUserSocket = {
-    result: 'Pomyślnie zaktualizowano',
+export const newGroup = {
+    result: 'Pomyślnie dodano grupę',
+    error: 0
+}
+
+export const updateGroup = {
+    result: 'Pomyślnie edytowano grupę',
+    error: 0
+}
+
+export const deleteGroup = {
+    result: 'Pomyślnie usunięto grupę',
     error: 0
 }

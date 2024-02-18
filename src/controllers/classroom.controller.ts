@@ -154,7 +154,7 @@ export const changeClassroomStatus = async (
         return response.status(201).json(Callback.changeStatus)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
-        return response.status(500).json({ error: error })
+        return response.status(500).json(Error.changeClassroomStatusError)
     }
 }
 

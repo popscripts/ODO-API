@@ -88,6 +88,7 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
             Group: {
                 select: {
                     id: true,
+                    openDayId: true,
                     groupSize: true,
                     GroupMembers: {
                         select: {

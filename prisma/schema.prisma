@@ -17,6 +17,7 @@ model OpenDay {
   Key       Key[]
   Order     Order[]
   User      User[]
+  Group     Group[]
 }
 
 model AccountType {
@@ -113,6 +114,8 @@ model User {
 
 model Group {
   id           Int        @id @default(autoincrement())
+  openDay      OpenDay    @relation(fields: [openDayId], references: [id])
+  openDayId    Int
   groupSize    Int?
   description  String?
   createdAt    DateTime   @default(now())
