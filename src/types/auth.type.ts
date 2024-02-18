@@ -1,5 +1,6 @@
 import { ManagedClassroom } from './classroom.type'
 import { Group } from '@customTypes/group.type'
+import { UserSocket } from '@customTypes/socket.type'
 
 export type NewUser = {
     openDayId: number
@@ -25,6 +26,7 @@ export type User = {
     pictureName: string | null
     ManagedClassroom: ManagedClassroom | null
     Group: Group | null
+    Socket: UserSocket | null
 }
 
 export type ShortUser = {

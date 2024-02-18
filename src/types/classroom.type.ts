@@ -42,10 +42,9 @@ export type ShortClassroom = {
     takenAt: Date | null
 }
 
-export type ClassroomStatusEvent = Event & {
+export type ClassroomStatusEvent = {
     id: number
     userId: number
-    accountType: string
     status: string
     prevStatus: string
 }

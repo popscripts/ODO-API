@@ -60,6 +60,12 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
             id
         },
         select: {
+            Socket: {
+                select: {
+                    id: true,
+                    connected: true
+                }
+            },
             id: true,
             openDayId: true,
             username: true,
