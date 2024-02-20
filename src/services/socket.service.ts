@@ -28,7 +28,8 @@ export const getSocket = async (id: string): Promise<Socket | null> => {
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             connected: true
@@ -55,7 +56,8 @@ export const getSocketByUserId = async (
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             connected: true
@@ -77,7 +79,8 @@ export const getSockets = async (): Promise<Socket[] | null> => {
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             connected: true

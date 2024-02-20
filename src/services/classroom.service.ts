@@ -24,7 +24,8 @@ export const listClassrooms = async (
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             status: true,
@@ -42,7 +43,8 @@ export const listClassrooms = async (
                                     id: true,
                                     connected: true
                                 }
-                            }
+                            },
+                            pictureName: true
                         }
                     },
                     groupSize: true,
@@ -62,7 +64,8 @@ export const listClassrooms = async (
                                     id: true,
                                     connected: true
                                 }
-                            }
+                            },
+                            pictureName: true
                         }
                     },
                     groupSize: true,
@@ -201,7 +204,8 @@ export const listClassroomsByStatus = async (
                                     id: true,
                                     connected: true
                                 }
-                            }
+                            },
+                            pictureName: true
                         }
                     },
                     groupSize: true,
@@ -221,7 +225,8 @@ export const listClassroomsByStatus = async (
                                     id: true,
                                     connected: true
                                 }
-                            }
+                            },
+                            pictureName: true
                         }
                     },
                     groupSize: true,
@@ -273,7 +278,8 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                                     id: true,
                                     connected: true
                                 }
-                            }
+                            },
+                            pictureName: true
                         }
                     },
                     groupSize: true,
@@ -293,7 +299,8 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                                     id: true,
                                     connected: true
                                 }
-                            }
+                            },
+                            pictureName: true
                         }
                     },
                     groupSize: true,

@@ -100,7 +100,8 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
                                     id: true,
                                     connected: true
                                 }
-                            }
+                            },
+                            pictureName: true
                         }
                     },
                     description: true,
@@ -263,8 +264,8 @@ export const saveProfilePictureToDatabase = async (
 
 export const getProfilePictureName = async (
     id: number
-): Promise<AuthType.PictureName | null> => {
-    return db.user.findUnique({
+): Promise<string | null> => {
+    const result = await db.user.findUnique({
         where: {
             id
         },
@@ -272,6 +273,12 @@ export const getProfilePictureName = async (
             pictureName: true
         }
     })
+
+    if (result?.pictureName) {
+        return result?.pictureName
+    }
+
+    return null
 }
 
 export const updatePersonalData = async (id: number, name: string) => {

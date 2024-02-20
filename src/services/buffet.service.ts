@@ -25,7 +25,8 @@ export const getOrders = async (
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             createdAt: true,
@@ -61,7 +62,8 @@ export const getUserOrders = async (
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             createdAt: true,
@@ -99,7 +101,8 @@ export const getOrdersByStatus = async (
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             createdAt: true,
@@ -135,7 +138,8 @@ export const getOrder = async (
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             createdAt: true,
@@ -212,7 +216,8 @@ export const getUserOrdersByStatus = async (
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             createdAt: true,
