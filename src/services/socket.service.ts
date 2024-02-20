@@ -22,7 +22,13 @@ export const getSocket = async (id: string): Promise<Socket | null> => {
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             connected: true
@@ -43,7 +49,13 @@ export const getSocketByUserId = async (
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             connected: true
@@ -59,7 +71,13 @@ export const getSockets = async (): Promise<Socket[] | null> => {
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             connected: true

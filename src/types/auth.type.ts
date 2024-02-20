@@ -33,6 +33,7 @@ export type ShortUser = {
     id: number
     username: string
     name: string | null
+    Socket: UserSocket | null
 }
 
 export type AccountType = {

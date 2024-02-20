@@ -1,7 +1,9 @@
 import { db } from '@utils/db.server'
 import * as BuffetType from '@customTypes/buffet.type'
 
-export const getOrders = async (openDayId: number): Promise<BuffetType.Order[]> => {
+export const getOrders = async (
+    openDayId: number
+): Promise<BuffetType.Order[]> => {
     return db.order.findMany({
         where: {
             openDayId
@@ -17,7 +19,13 @@ export const getOrders = async (openDayId: number): Promise<BuffetType.Order[]> 
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             createdAt: true,
@@ -29,7 +37,9 @@ export const getOrders = async (openDayId: number): Promise<BuffetType.Order[]> 
     })
 }
 
-export const getUserOrders = async (orderedById: number): Promise<BuffetType.Order[]> => {
+export const getUserOrders = async (
+    orderedById: number
+): Promise<BuffetType.Order[]> => {
     return db.order.findMany({
         where: {
             orderedById
@@ -45,7 +55,13 @@ export const getUserOrders = async (orderedById: number): Promise<BuffetType.Ord
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             createdAt: true,
@@ -57,7 +73,10 @@ export const getUserOrders = async (orderedById: number): Promise<BuffetType.Ord
     })
 }
 
-export const getOrdersByStatus = async (openDayId: number, statusId: number): Promise<BuffetType.Order[]> => {
+export const getOrdersByStatus = async (
+    openDayId: number,
+    statusId: number
+): Promise<BuffetType.Order[]> => {
     return db.order.findMany({
         where: {
             openDayId,
@@ -74,7 +93,13 @@ export const getOrdersByStatus = async (openDayId: number, statusId: number): Pr
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             createdAt: true,
@@ -86,7 +111,9 @@ export const getOrdersByStatus = async (openDayId: number, statusId: number): Pr
     })
 }
 
-export const getOrder = async (id: number): Promise<BuffetType.Order | null> => {
+export const getOrder = async (
+    id: number
+): Promise<BuffetType.Order | null> => {
     return db.order.findUnique({
         where: {
             id
@@ -102,7 +129,13 @@ export const getOrder = async (id: number): Promise<BuffetType.Order | null> => 
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             createdAt: true,
@@ -129,7 +162,9 @@ export const placeOrder = async (
     })
 }
 
-export const checkAmountOfActiveUserOrders = async (orderedById: number): Promise<number> => {
+export const checkAmountOfActiveUserOrders = async (
+    orderedById: number
+): Promise<number> => {
     return db.order.count({
         where: {
             orderedById,
@@ -171,7 +206,13 @@ export const getUserOrdersByStatus = async (
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             createdAt: true,

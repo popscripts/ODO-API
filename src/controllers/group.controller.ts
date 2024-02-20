@@ -6,6 +6,7 @@ import * as Callbacks from '@libs/callbacks'
 import { Group } from '@customTypes/group.type'
 import { verifyToken } from '@utils/auth.helper'
 import { Server } from 'socket.io'
+import { ShortUser } from '@customTypes/auth.type'
 
 export const getGroups = async (
     request: Request,
@@ -101,6 +102,57 @@ export const deleteGroup = async (
     }
 }
 
+export const addGroupVisitedClassroom = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
+    try {
+        const { id, classroomId } = request.body
+
+        await GroupService.addGroupVisitedClassroom(id, classroomId)
+
+        return response.status(201).json(Callbacks.addGroupVisitedClassroom)
+    } catch (error: any) {
+        logger.error(`500 | ${error}`)
+        return response.status(500).json(Error.addGroupVisitedClassroomError)
+    }
+}
+
+export const getGroupVisitedClassroom = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
+    try {
+        const id: number = parseInt(request.params.id)
+        const groupVisitedClassrooms =
+            await GroupService.getGroupVisitedClassrooms(id)
+
+        return response
+            .status(200)
+            .json({ result: groupVisitedClassrooms, error: 0 })
+    } catch (error: any) {
+        logger.error(`500 | ${error}`)
+        return response.status(500).json(Error.getGroupVisitedClassroomsError)
+    }
+}
+
+export const deleteGroupVisitedClassroom = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
+    try {
+        const { id, classroomId } = request.body
+        await GroupService.deleteGroupVisitedClassroom(id, classroomId)
+
+        await emitDeletedGroupVisitedClassroom(request.io, id, classroomId)
+
+        return response.status(200).json(Callbacks.deleteGroupVisitedClassroom)
+    } catch (error: any) {
+        logger.error(`500 | ${error}`)
+        return response.status(500).json(Error.deleteGroupVisitedClassroomError)
+    }
+}
+
 const emitGroup = async (io: Server, groupId: number): Promise<void> => {
     try {
         const group: Group | null = await GroupService.getGroup(groupId)
@@ -124,5 +176,36 @@ const emitDeletedGroup = (io: Server, groupId: number): void => {
         logger.log('socket', `Deleted group ${groupId} ID emitted`)
     } catch (error: any) {
         logger.log('socket', `emitDeletedGroup ${error.message} | error: ${1}`)
+    }
+}
+
+const emitDeletedGroupVisitedClassroom = async (
+    io: Server,
+    groupId: number,
+    classroomId: number
+): Promise<void> => {
+    try {
+        const group: Group | null = await GroupService.getGroup(groupId)
+
+        if (group?.GroupMembers) {
+            group.GroupMembers.map((groupMember: ShortUser) => {
+                if (groupMember.Socket?.id) {
+                    io.to(groupMember.Socket?.id).emit(
+                        'groupVisitedClassroomDeleted',
+                        classroomId
+                    )
+                }
+            })
+        }
+
+        logger.log(
+            'socket',
+            `Deleted group visited classroom ${classroomId} for group ${groupId} emitted`
+        )
+    } catch (error: any) {
+        logger.log(
+            'socket',
+            `emitDeletedGroupVisitedClassroom ${error.message} | error: ${1}`
+        )
     }
 }

@@ -94,7 +94,13 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
                         select: {
                             id: true,
                             username: true,
-                            name: true
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            }
                         }
                     },
                     description: true,
@@ -120,6 +126,13 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
                             status: true,
                             reservedAt: true,
                             takenAt: true
+                        }
+                    },
+                    GroupVisitedClassrooms: {
+                        select: {
+                            id: true,
+                            groupId: true,
+                            classroomId: true
                         }
                     }
                 }

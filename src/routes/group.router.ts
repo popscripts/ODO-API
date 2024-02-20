@@ -1,9 +1,13 @@
 import express, { Router } from 'express'
 import * as GroupController from '@controllers/group.controller'
 import { authorize } from '@middlewares/authorization'
-import { isUserMemberOfGroupVerification } from '@middlewares/groupMemberVerification'
+import {
+    isUserMemberOfAnyOtherGroupVerification,
+    isUserMemberOfGroupVerification
+} from '@middlewares/groupMemberVerification'
 import { validate } from '@middlewares/validation'
 import { groupValidation } from '@validations/group.validations'
+import { groupVisitedClassroomVerification } from '@middlewares/groupVisitedClassroomVerification'
 
 export const groupRouter: Router = express.Router()
 
@@ -13,15 +17,15 @@ export const groupRouter: Router = express.Router()
 groupRouter.get('/', authorize, GroupController.getGroups)
 
 /**
- * GET: Get group by ID
- */
-groupRouter.get('/:id', authorize, GroupController.getGroup)
-
-/**
  * POST: Add group
  * Optional params: groupSize (number), description (string), groupMembers (ShortUser[])
  */
-groupRouter.post('/', authorize, GroupController.addGroup)
+groupRouter.post(
+    '/',
+    authorize,
+    isUserMemberOfAnyOtherGroupVerification,
+    GroupController.addGroup
+)
 
 /**
  * PUT: Update group
@@ -31,10 +35,12 @@ groupRouter.post('/', authorize, GroupController.addGroup)
 groupRouter.put(
     '/',
     authorize,
-    isUserMemberOfGroupVerification,
     validate(groupValidation),
+    isUserMemberOfGroupVerification,
+    isUserMemberOfAnyOtherGroupVerification,
     GroupController.updateGroup
 )
+
 /**
  * DELETE: Delete group
  * Params: ID (groupId)
@@ -42,7 +48,45 @@ groupRouter.put(
 groupRouter.delete(
     '/',
     authorize,
-    isUserMemberOfGroupVerification,
     validate(groupValidation),
+    isUserMemberOfGroupVerification,
     GroupController.deleteGroup
 )
+
+/**
+ * POST: Get group visited classrooms
+ * Params: ID (groupId)
+ */
+groupRouter.get(
+    '/visited-classrooms/:id',
+    authorize,
+    GroupController.getGroupVisitedClassroom
+)
+
+/**
+ * POST: Add group visited classroom
+ * Params: ID (groupId), classroomId
+ */
+groupRouter.post(
+    '/visited-classrooms',
+    authorize,
+    validate(groupValidation),
+    groupVisitedClassroomVerification,
+    GroupController.addGroupVisitedClassroom
+)
+
+/**
+ * POST: Delete group visited classroom
+ * Params: ID (groupId), classroomId
+ */
+groupRouter.delete(
+    '/visited-classrooms',
+    authorize,
+    isUserMemberOfGroupVerification,
+    GroupController.deleteGroupVisitedClassroom
+)
+
+/**
+ * GET: Get group by ID
+ */
+groupRouter.get('/:id', authorize, GroupController.getGroup)

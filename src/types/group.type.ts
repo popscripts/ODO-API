@@ -9,6 +9,7 @@ export type Group = {
     description: string | null
     Reserved: ShortClassroom | null
     Taken: ShortClassroom | null
+    GroupVisitedClassrooms: GroupVisitedClassroom[] | null
 }
 
 export type ShortGroup = {
@@ -16,4 +17,10 @@ export type ShortGroup = {
     GroupMembers: ShortUser[] | null
     groupSize: number | null
     description: string | null
+}
+
+export type GroupVisitedClassroom = {
+    id: number
+    groupId: number
+    classroomId: number
 }
