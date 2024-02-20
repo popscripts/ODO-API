@@ -101,7 +101,7 @@ model User {
   username         String      @unique @db.VarChar(64)
   password         String      @db.VarChar(255)
   name             String?     @db.VarChar(64)
-  Group            Group?      @relation(fields: [groupId], references: [id])
+  Group            Group?      @relation(fields: [groupId], references: [id], onDelete: SetNull)
   groupId          Int?
   pictureName      String?     @db.VarChar(255)
   active           Boolean     @default(true)
@@ -113,16 +113,17 @@ model User {
 }
 
 model Group {
-  id           Int        @id @default(autoincrement())
-  openDay      OpenDay    @relation(fields: [openDayId], references: [id])
-  openDayId    Int
-  groupSize    Int?
-  description  String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  Reserved     Classroom? @relation("reserved")
-  Taken        Classroom? @relation("taken")
-  GroupMembers User[]
+  id                     Int                     @id @default(autoincrement())
+  openDay                OpenDay                 @relation(fields: [openDayId], references: [id])
+  openDayId              Int
+  groupSize              Int?
+  description            String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  Reserved               Classroom?              @relation("reserved")
+  Taken                  Classroom?              @relation("taken")
+  GroupMembers           User[]
+  GroupVisitedClassrooms GroupVisitedClassroom[]
 }
 
 model Dish {
@@ -138,4 +139,11 @@ model Socket {
   User      User?   @relation(fields: [userId], references: [id])
   userId    Int?    @unique
   connected Boolean @default(false)
+}
+
+model GroupVisitedClassroom {
+  id          Int   @id @default(autoincrement())
+  Group       Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId     Int
+  classroomId Int
 }

@@ -18,7 +18,13 @@ export const listClassrooms = async (
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             status: true,
@@ -30,7 +36,13 @@ export const listClassrooms = async (
                         select: {
                             id: true,
                             username: true,
-                            name: true
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            }
                         }
                     },
                     groupSize: true,
@@ -44,7 +56,13 @@ export const listClassrooms = async (
                         select: {
                             id: true,
                             username: true,
-                            name: true
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            }
                         }
                     },
                     groupSize: true,
@@ -159,7 +177,13 @@ export const listClassroomsByStatus = async (
                     id: true,
                     username: true,
                     pictureName: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             status: true,
@@ -171,7 +195,13 @@ export const listClassroomsByStatus = async (
                         select: {
                             id: true,
                             username: true,
-                            name: true
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            }
                         }
                     },
                     groupSize: true,
@@ -185,7 +215,13 @@ export const listClassroomsByStatus = async (
                         select: {
                             id: true,
                             username: true,
-                            name: true
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            }
                         }
                     },
                     groupSize: true,
@@ -213,7 +249,13 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                     id: true,
                     username: true,
                     pictureName: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             status: true,
@@ -225,7 +267,13 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                         select: {
                             id: true,
                             username: true,
-                            name: true
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            }
                         }
                     },
                     groupSize: true,
@@ -239,7 +287,13 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                         select: {
                             id: true,
                             username: true,
-                            name: true
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            }
                         }
                     },
                     groupSize: true,

@@ -18,7 +18,13 @@ export const getGroups = async (openDayId: number): Promise<Group[] | null> => {
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             description: true,
@@ -44,6 +50,13 @@ export const getGroups = async (openDayId: number): Promise<Group[] | null> => {
                     status: true,
                     reservedAt: true,
                     takenAt: true
+                }
+            },
+            GroupVisitedClassrooms: {
+                select: {
+                    id: true,
+                    groupId: true,
+                    classroomId: true
                 }
             }
         }
@@ -63,7 +76,13 @@ export const getGroup = async (id: number): Promise<Group | null> => {
                 select: {
                     id: true,
                     username: true,
-                    name: true
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    }
                 }
             },
             description: true,
@@ -89,6 +108,13 @@ export const getGroup = async (id: number): Promise<Group | null> => {
                     status: true,
                     reservedAt: true,
                     takenAt: true
+                }
+            },
+            GroupVisitedClassrooms: {
+                select: {
+                    id: true,
+                    groupId: true,
+                    classroomId: true
                 }
             }
         }
@@ -197,4 +223,59 @@ export const isUserMemberOfGroup = async (
     })
 
     return !!isMember
+}
+
+export const addGroupVisitedClassroom = async (
+    groupId: number,
+    classroomId: number
+) => {
+    return db.groupVisitedClassroom.create({
+        data: {
+            groupId,
+            classroomId
+        }
+    })
+}
+
+export const getGroupVisitedClassrooms = async (groupId: number) => {
+    return db.groupVisitedClassroom.findMany({
+        where: {
+            groupId
+        }
+    })
+}
+
+export const deleteGroupVisitedClassroom = async (
+    groupId: number,
+    classroomId: number
+) => {
+    return db.groupVisitedClassroom.deleteMany({
+        where: {
+            AND: [{ groupId }, { classroomId }]
+        }
+    })
+}
+
+export const isClassroomAlreadyVisited = async (
+    groupId: number,
+    classroomId: number
+): Promise<boolean> => {
+    const isVisited: number = await db.groupVisitedClassroom.count({
+        where: {
+            AND: [{ groupId }, { classroomId }]
+        }
+    })
+
+    return !!isVisited
+}
+
+export const isUserMemberOfAnyGroup = async (id: number): Promise<boolean> => {
+    const isNotAMember: number = await db.user.count({
+        where: {
+            id,
+            groupId: null
+        }
+    })
+
+    return !isNotAMember
 }
