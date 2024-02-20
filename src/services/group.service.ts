@@ -24,7 +24,8 @@ export const getGroups = async (openDayId: number): Promise<Group[] | null> => {
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             description: true,
@@ -82,7 +83,8 @@ export const getGroup = async (id: number): Promise<Group | null> => {
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    pictureName: true
                 }
             },
             description: true,

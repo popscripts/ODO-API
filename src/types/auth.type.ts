@@ -34,6 +34,7 @@ export type ShortUser = {
     username: string
     name: string | null
     Socket: UserSocket | null
+    pictureName: string | null
 }
 
 export type AccountType = {
@@ -57,10 +58,6 @@ export type Users = {
     openDayId: number
     accountType: AccountType
     active: boolean
-}
-
-export type PictureName = {
-    pictureName: string | null
 }
 
 export type SocketUserData = {
