@@ -3,7 +3,7 @@ import * as GroupService from '@services/group.service'
 import { logger } from '@config/logger'
 import * as Error from '@libs/errors'
 import * as Callbacks from '@libs/callbacks'
-import { Group } from '@customTypes/group.type'
+import { Group, Member } from '@customTypes/group.type'
 import { verifyToken } from '@utils/auth.helper'
 import { Server } from 'socket.io'
 import { ShortUser } from '@customTypes/auth.type'
@@ -150,6 +150,19 @@ export const deleteGroupVisitedClassroom = async (
     } catch (error: any) {
         logger.error(`500 | ${error}`)
         return response.status(500).json(Error.deleteGroupVisitedClassroomError)
+    }
+}
+
+export const getMembersList = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
+    try {
+        const membersList: Member[] = await GroupService.getMembersList()
+        return response.status(200).json({ result: membersList, error: 0 })
+    } catch (error: any) {
+        logger.error(`500 | ${error}`)
+        return response.status(500).json(Error.getMembersListError)
     }
 }
 

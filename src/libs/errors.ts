@@ -129,3 +129,8 @@ export const userIsAMemberOfOtherGroupError: JsonResponse = {
     result: 'Co najmniej jeden z użytkowników należy już do innej grupy',
     error: 1
 }
+
+export const getMembersListError: JsonResponse = {
+    result: 'Wystąpił błąd podczas pobierania danych',
+    error: 1
+}

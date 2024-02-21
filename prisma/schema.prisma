@@ -117,7 +117,7 @@ model Group {
   openDay                OpenDay                 @relation(fields: [openDayId], references: [id])
   openDayId              Int
   groupSize              Int?
-  description            String?
+  description            String?                 @db.VarChar(255)
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   Reserved               Classroom?              @relation("reserved")

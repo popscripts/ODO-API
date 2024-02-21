@@ -1,4 +1,4 @@
-import { Group } from '@customTypes/group.type'
+import { Group, Member } from '@customTypes/group.type'
 import { db } from '@utils/db.server'
 import { ShortUser } from '@customTypes/auth.type'
 import { AccountTypes } from '@libs/accountTypes'
@@ -284,4 +284,15 @@ export const isUserMemberOfAnyGroup = async (id: number): Promise<boolean> => {
     })
 
     return !isNotAMember
+}
+
+export const getMembersList = async (): Promise<Member[]> => {
+    return db.user.findMany({
+        select: {
+            id: true,
+            name: true,
+            groupId: true
+        },
+        orderBy: [{ groupId: 'asc' }, { name: 'asc' }]
+    })
 }
