@@ -6,11 +6,12 @@ export type Socket = {
     connected: boolean
 }
 
-export type SocketUserId = {
-    userId: number
-}
-
 export type UserSocket = {
     id: string
     connected: boolean
+}
+
+export type SocketUserData = {
+    id: number
+    accountType: string
 }

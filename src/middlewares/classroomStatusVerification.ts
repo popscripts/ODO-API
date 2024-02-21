@@ -117,17 +117,16 @@ const isClassroomStatusVerified = async (
                 return notVerifiedStatusResponse
             }
         case ClassroomStatusEnum[ClassroomStatusEnum.reserved]:
-            if (
-                isAlreadyFreeAndNoClassroomIsTakenByGroup(
-                    classroomStatus,
-                    groupTaken
-                )
-            ) {
+            if (isAlreadyFree(classroomStatus)) {
+                return verifiedStatusResponse
+            }
+
+            if (!isClassroomReservedByOtherGroup(classroom)) {
                 return verifiedStatusResponse
             }
 
             if (
-                isNotReservedAndNotBusy(classroomStatus) &&
+                isNotReserved(classroomStatus) &&
                 doesGroupHasNoReservations(groupReserved)
             ) {
                 return verifiedStatusResponse
@@ -162,8 +161,8 @@ const isAlreadyFreeAndNoClassroomIsTakenByGroup = (
     return classroomStatus === ClassroomStatusEnum.free && groupTaken === null
 }
 
-const isNotReservedAndNotBusy = (status: number | undefined): boolean => {
-    return status !== (ClassroomStatusEnum.reserved && ClassroomStatusEnum.busy)
+const isNotReserved = (status: number | undefined): boolean => {
+    return status !== ClassroomStatusEnum.reserved
 }
 
 const isClassroomTakenByGroup = (
@@ -201,4 +200,10 @@ const doesGroupHasNoReservations = (
     groupReserved: ShortClassroom | undefined | null
 ): boolean => {
     return groupReserved === null
+}
+
+const isClassroomReservedByOtherGroup = (
+    classroom: Classroom | null
+): boolean => {
+    return !!classroom?.reservedBy
 }
