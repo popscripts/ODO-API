@@ -1,28 +1,24 @@
 import { Socket } from 'socket.io'
-import { SocketUserId } from '@customTypes/socket.type'
 import { logger } from '@config/logger'
 import * as SocketService from '@services/socket.service'
 import * as Errors from '@libs/errors'
 import { deleteSocket } from '@services/socket.service'
-import { SocketUserData } from '@customTypes/auth.type'
+import { SocketUserData } from '@customTypes/socket.type'
 
 export const registerUserSocket = async (
     socket: Socket,
-    data: SocketUserId
+    userId: number
 ): Promise<void> => {
     try {
-        if (!data.userId) {
-            return
-        }
-
-        await SocketService.updateSocket(data.userId, socket.id)
+        await SocketService.updateSocket(userId, socket.id)
     } catch (error: any) {
         socket.emit('registerUserCallback', Errors.registerUserSocketError)
+
         logger.error(
             handleErrorLogMessage(
                 'registerUserSocket',
                 error,
-                data?.userId,
+                userId,
                 socket.id
             )
         )
@@ -50,7 +46,7 @@ export const joinRoom = (
         socket.join(data.accountType)
         logger.log(
             'socket',
-            `${data.username} joined room '${data.accountType}'`
+            `User with ID ${data.id} joined room '${data.accountType}'`
         )
     }
 }

@@ -59,9 +59,3 @@ export type Users = {
     accountType: AccountType
     active: boolean
 }
-
-export type SocketUserData = {
-    id: number
-    username: string
-    accountType: string
-}

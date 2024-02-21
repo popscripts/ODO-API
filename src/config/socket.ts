@@ -18,14 +18,11 @@ export const ioConnectionConfig = (app: Express, io: Server): void => {
             socketEventLogger(event, socket, next)
         })
 
-        socket.use(
-            async (event: Event, next: any): Promise<void> =>
-                registerSocketMiddleware(event, io, socket, next)
-        )
-
-        socket.on('joinRoom', (data, err) =>
-            SocketController.joinRoom(socket, data, err)
-        )
+        socket.on('joinRoom', (data, err) => {
+            registerSocketMiddleware(data, socket).then(() => {
+                SocketController.joinRoom(socket, data, err)
+            })
+        })
 
         // // Just for development purpose
         // socket.on('send_message', (data) => {

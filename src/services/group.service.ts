@@ -272,6 +272,10 @@ export const isClassroomAlreadyVisited = async (
 }
 
 export const isUserMemberOfAnyGroup = async (id: number): Promise<boolean> => {
+    if (id === 0) {
+        return false
+    }
+
     const isNotAMember: number = await db.user.count({
         where: {
             id,
