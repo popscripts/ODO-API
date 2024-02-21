@@ -87,6 +87,11 @@ groupRouter.delete(
 )
 
 /**
+ * GET: Get list of users for add group member select
+ */
+groupRouter.get('/members-list', authorize, GroupController.getMembersList)
+
+/**
  * GET: Get group by ID
  */
 groupRouter.get('/:id', authorize, GroupController.getGroup)

@@ -24,3 +24,8 @@ export type GroupVisitedClassroom = {
     groupId: number
     classroomId: number
 }
+
+export type Member = {
+    id: number
+    name: string | null
+}
