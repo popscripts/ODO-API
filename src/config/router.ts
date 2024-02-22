@@ -5,6 +5,7 @@ import { keyRouter } from '@routes/key.router'
 import { buffetRouter } from '@routes/buffet.router'
 import { infoRouter } from '@routes/info.router'
 import { groupRouter } from '@routes/group.router'
+import { dynamicContentRouter } from '@routes/dynamiContent.router'
 
 export const routerConfig = (app: Express): void => {
     app.use('/api/auth', authRouter)
@@ -13,4 +14,5 @@ export const routerConfig = (app: Express): void => {
     app.use('/api/buffet', buffetRouter)
     app.use('/api/info', infoRouter)
     app.use('/api/group', groupRouter)
+    app.use('/api/dynamic-content', dynamicContentRouter)
 }
