@@ -18,7 +18,7 @@ groupRouter.get('/', authorize, GroupController.getGroups)
 
 /**
  * POST: Add group
- * Optional params: groupSize (number), description (string), groupMembers (ShortUser[])
+ * Optional params: groupSize (number), description (string), groupMembers (Member[])
  */
 groupRouter.post(
     '/',
@@ -30,7 +30,7 @@ groupRouter.post(
 /**
  * PUT: Update group
  * Params: ID (groupId)
- * Optional params: groupSize (number), description (string), groupMembers (ShortUser[])
+ * Optional params: groupSize (number), description (string), groupMembers (Member[])
  */
 groupRouter.put(
     '/',
