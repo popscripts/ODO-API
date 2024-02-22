@@ -1,7 +1,5 @@
 import { Request, Response } from 'express'
 import * as Error from '@libs/errors'
-import { verifyToken } from '@utils/auth.helper'
-import { Token } from '@customTypes/auth.type'
 import * as Callback from '@libs/callbacks'
 import { logger } from '@config/logger'
 import { Info } from '@customTypes/info.type'
@@ -9,9 +7,10 @@ import * as InfoService from '@services/info.service'
 
 export const info = async (request: Request, response: Response) => {
     try {
-        const token: string = request.cookies.JWT
-        const { openDayId }: Token = verifyToken(token, 'accessToken')
-        const info: Info | null = await InfoService.getInfo(openDayId)
+        const info: Info | null = await InfoService.getInfo(
+            request.user.openDayId
+        )
+
         return response.status(200).json({ result: info, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -22,9 +21,8 @@ export const info = async (request: Request, response: Response) => {
 export const addInfo = async (request: Request, response: Response) => {
     try {
         const content: string = request.body.content
-        const token: string = request.cookies.JWT
-        const { openDayId }: Token = verifyToken(token, 'accessToken')
-        await InfoService.addInfo(openDayId, content)
+        await InfoService.addInfo(request.user.id, content)
+
         return response.status(201).json(Callback.newInfo)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -35,9 +33,8 @@ export const addInfo = async (request: Request, response: Response) => {
 export const editInfo = async (request: Request, response: Response) => {
     try {
         const content: string = request.body.content
-        const token: string = request.cookies.JWT
-        const { openDayId }: Token = verifyToken(token, 'accessToken')
-        await InfoService.editInfo(openDayId, content)
+        await InfoService.editInfo(request.user.openDayId, content)
+
         return response.status(201).json(Callback.editInfo)
     } catch (error: any) {
         logger.error(`500 | ${error}`)

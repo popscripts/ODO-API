@@ -2,10 +2,8 @@ import * as ClassroomService from '@services/classroom.service'
 import { Request, Response } from 'express'
 import * as Error from '@libs/errors'
 import * as Callback from '@libs/callbacks'
-import * as AuthHelper from '@utils/auth.helper'
 import { setClassroomStatus } from '@utils/status.helper'
-import { Token, User } from '@customTypes/auth.type'
-import { verifyToken } from '@utils/auth.helper'
+import { User } from '@customTypes/auth.type'
 import { logger } from '@config/logger'
 import { Classroom, ClassroomStatusEvent } from '@customTypes/classroom.type'
 import { getUser } from '@services/auth.service'
@@ -17,10 +15,10 @@ export const listClassrooms = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const token: string = request.cookies.JWT
-        const { openDayId }: Token = verifyToken(token, 'accessToken')
-        const classrooms: Classroom[] =
-            await ClassroomService.listClassrooms(openDayId)
+        const classrooms: Classroom[] = await ClassroomService.listClassrooms(
+            request.user.openDayId
+        )
+
         return response.status(200).json({ result: classrooms, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -34,11 +32,9 @@ export const addClassroom = async (
 ): Promise<Response> => {
     try {
         const { classroom, title, description, managedById } = request.body
-        const token = request.cookies.JWT
-        const { openDayId }: Token = verifyToken(token, 'accessToken')
 
         const { id } = await ClassroomService.addClassroom(
-            openDayId,
+            request.user.openDayId,
             classroom,
             title,
             description,
@@ -110,13 +106,11 @@ export const listClassroomsByStatus = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const token: string = request.cookies.JWT
-        const tokenData: Token = verifyToken(token, 'accessToken')
         const status: string = request.params.status
 
         const classrooms: Classroom[] =
             await ClassroomService.listClassroomsByStatus(
-                tokenData.openDayId,
+                request.user.openDayId,
                 status
             )
 
@@ -134,19 +128,14 @@ export const changeClassroomStatus = async (
     try {
         const { id, status, prevStatus } = request.body
 
-        const tokenData: Token = AuthHelper.verifyToken(
-            request.cookies.JWT,
-            'accessToken'
-        )
-
-        const user: User | null = await getUser(tokenData.id)
+        const user: User | null = await getUser(request.user.id)
         await setClassroomStatus(id, status, user!.Group!.id)
 
         const socketData: ClassroomStatusEvent = {
             id,
             status,
             prevStatus,
-            userId: tokenData.id
+            userId: request.user.id
         }
 
         await emitClassroomStatus(request.io, socketData)

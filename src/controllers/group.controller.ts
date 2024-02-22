@@ -4,7 +4,6 @@ import { logger } from '@config/logger'
 import * as Error from '@libs/errors'
 import * as Callbacks from '@libs/callbacks'
 import { Group, Member } from '@customTypes/group.type'
-import { verifyToken } from '@utils/auth.helper'
 import { Server } from 'socket.io'
 import { ShortUser } from '@customTypes/auth.type'
 
@@ -13,9 +12,9 @@ export const getGroups = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const token: string = request.cookies.JWT
-        const { openDayId } = verifyToken(token, 'accessToken')
-        const groups: Group[] | null = await GroupService.getGroups(openDayId)
+        const groups: Group[] | null = await GroupService.getGroups(
+            request.user.openDayId
+        )
 
         return response.status(200).json({ result: groups, error: 0 })
     } catch (error: any) {
@@ -31,6 +30,7 @@ export const getGroup = async (
     try {
         const groupId: number = parseInt(request.params.id)
         const group: Group | null = await GroupService.getGroup(groupId)
+
         return response.status(200).json({ result: group, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -44,16 +44,18 @@ export const addGroup = async (
 ): Promise<Response> => {
     try {
         const { groupSize, description, groupMembers } = request.body
-        const token: string = request.cookies.JWT
-        const { openDayId } = verifyToken(token, 'accessToken')
 
         const { id } = await GroupService.addGroup(
-            openDayId,
+            request.user.openDayId,
             groupSize,
             description
         )
 
-        await GroupService.updateGroupMembers(openDayId, id, groupMembers)
+        await GroupService.updateGroupMembers(
+            request.user.openDayId,
+            id,
+            groupMembers
+        )
 
         await emitGroup(request.io, id)
 
@@ -70,12 +72,13 @@ export const updateGroup = async (
 ): Promise<Response> => {
     try {
         const { id, groupSize, description, groupMembers } = request.body
-        const token: string = request.cookies.JWT
-        const { openDayId } = verifyToken(token, 'accessToken')
-
         await GroupService.updateGroup(id, groupSize, description)
 
-        await GroupService.updateGroupMembers(openDayId, id, groupMembers)
+        await GroupService.updateGroupMembers(
+            request.user.openDayId,
+            id,
+            groupMembers
+        )
 
         await emitGroup(request.io, id)
 

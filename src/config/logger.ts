@@ -16,7 +16,7 @@ const levels = {
 const format = winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.printf(
-        (info) => `${info.timestamp} ${info.level}: ${info.message}`
+        (info) => `[${info.timestamp}] ${info.level}: ${info.message}`
     )
 )
 

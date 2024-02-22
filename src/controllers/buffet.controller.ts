@@ -1,8 +1,6 @@
 import { Request, Response } from 'express'
 import * as BuffetService from '@services/buffet.service'
 import * as Error from '@libs/errors'
-import { verifyToken } from '@utils/auth.helper'
-import { Token } from '@customTypes/auth.type'
 import * as Callback from '@libs/callbacks'
 import { statuses } from '@libs/statuses'
 import { logger } from '@config/logger'
@@ -11,9 +9,10 @@ import { Dishes } from '@libs/dishes'
 
 export const orders = async (request: Request, response: Response) => {
     try {
-        const token = request.cookies.JWT
-        const tokenData: Token = verifyToken(token, 'accessToken')
-        const orders: Order[] = await BuffetService.getOrders(tokenData.openDayId)
+        const orders: Order[] = await BuffetService.getOrders(
+            request.user.openDayId
+        )
+
         return response.status(200).json({ result: orders, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -23,9 +22,10 @@ export const orders = async (request: Request, response: Response) => {
 
 export const userOrders = async (request: Request, response: Response) => {
     try {
-        const token: string = request.cookies.JWT
-        const tokenData: Token = verifyToken(token, 'accessToken')
-        const usersOrders: Order[] = await BuffetService.getUserOrders(tokenData.id)
+        const usersOrders: Order[] = await BuffetService.getUserOrders(
+            request.user.id
+        )
+
         return response.status(200).json({ result: usersOrders, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -36,10 +36,13 @@ export const userOrders = async (request: Request, response: Response) => {
 export const ordersByStatus = async (request: Request, response: Response) => {
     try {
         const status: string = request.params.status
-        const token = request.cookies.JWT
-        const tokenData: Token = verifyToken(token, 'accessToken')
         const statusId: number = statuses[status]
-        const orders: Order[] = await BuffetService.getOrdersByStatus(tokenData.openDayId, statusId)
+
+        const orders: Order[] = await BuffetService.getOrdersByStatus(
+            request.user.openDayId,
+            statusId
+        )
+
         return response.status(200).json({ result: orders, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -50,9 +53,15 @@ export const ordersByStatus = async (request: Request, response: Response) => {
 export const placeOrder = async (request: Request, response: Response) => {
     try {
         const { dish, amount, comment }: NewOrder = request.body
-        const { openDayId, id }: Token = verifyToken(request.cookies.JWT, 'accessToken')
-        const dishId: number = Dishes[dish]
-        await BuffetService.placeOrder(openDayId, id, dishId, amount, comment)
+
+        await BuffetService.placeOrder(
+            request.user.openDayId,
+            request.user.id,
+            Dishes[dish],
+            amount,
+            comment
+        )
+
         return response.status(201).json(Callback.newOrder)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -60,7 +69,10 @@ export const placeOrder = async (request: Request, response: Response) => {
     }
 }
 
-export const changeOrderStatus = async (request: Request, response: Response) => {
+export const changeOrderStatus = async (
+    request: Request,
+    response: Response
+) => {
     try {
         const { id, status } = request.body
         const statusId = statuses[status]
@@ -72,17 +84,17 @@ export const changeOrderStatus = async (request: Request, response: Response) =>
     }
 }
 
-export const userOrdersByStatus = async (request: Request, response: Response) => {
+export const userOrdersByStatus = async (
+    request: Request,
+    response: Response
+) => {
     try {
-        const status: string = request.params.status
-        const statusId: number = statuses[status]
-        const token: string = request.cookies.JWT
-        const tokenData = verifyToken(token, 'accessToken')
         const usersOrders = await BuffetService.getUserOrdersByStatus(
-            tokenData.openDayId,
-            statusId,
-            tokenData.id
+            request.user.openDayId,
+            statuses[request.params.status],
+            request.user.id
         )
+
         return response.status(200).json({ result: usersOrders, error: 0 })
     } catch (error: any) {
         return response.status(500).json(Error.responseError)

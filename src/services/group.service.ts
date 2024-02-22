@@ -1,6 +1,5 @@
 import { Group, Member } from '@customTypes/group.type'
 import { db } from '@utils/db.server'
-import { ShortUser } from '@customTypes/auth.type'
 import { AccountTypes } from '@libs/accountTypes'
 import { faker } from '@faker-js/faker'
 import { hashPassword } from '@utils/auth.helper'
@@ -143,7 +142,7 @@ export const addGroup = async (
 export const updateGroupMembers = async (
     openDayId: number,
     groupId: number,
-    groupMembers: ShortUser[]
+    groupMembers: Member[]
 ): Promise<void> => {
     for (const groupMembersKey in groupMembers) {
         await db.user.upsert({

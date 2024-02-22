@@ -7,7 +7,10 @@ export const hashPassword = async (password: string): Promise<string> => {
     return await bcrypt.hash(password, 10)
 }
 
-export const validatePassword = async (plainPassword: string, hashedPassword: string): Promise<boolean> => {
+export const validatePassword = async (
+    plainPassword: string,
+    hashedPassword: string
+): Promise<boolean> => {
     return await bcrypt.compare(plainPassword, hashedPassword)
 }
 
@@ -38,12 +41,9 @@ export const verifyToken = (token: string, tokenType: string): Token => {
         process.exit(1)
     }
     const secretKey: string =
-        tokenType === 'accessToken' ? process.env.JWT_SECRET_KEY : process.env.JWT_REFRESH_KEY
+        tokenType === 'accessToken'
+            ? process.env.JWT_SECRET_KEY
+            : process.env.JWT_REFRESH_KEY
 
     return jwt.verify(token, secretKey) as Token
-}
-
-export const getOpenDayId = (token: string) => {
-    const tokenData: Token = verifyToken(token, 'accessToken')
-    return tokenData.openDayId
 }

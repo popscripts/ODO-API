@@ -1,5 +1,3 @@
-import { Token } from '@customTypes/auth.type'
-import { verifyToken } from '@utils/auth.helper'
 import * as GroupService from '@services/group.service'
 import { Request, NextFunction, Response } from 'express'
 import * as Error from '@libs/errors'
@@ -9,11 +7,10 @@ export const groupVisitedClassroomVerification = async (
     response: Response,
     next: NextFunction
 ): Promise<void> => {
-    const tokenData: Token = verifyToken(request.cookies.JWT, 'accessToken')
     const { id, classroomId } = request.body
 
     let verified: boolean = await GroupService.isUserMemberOfGroup(
-        tokenData.id,
+        request.user.id,
         id
     )
 
