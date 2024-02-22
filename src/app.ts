@@ -11,6 +11,7 @@ import { Server as httpServer, createServer } from 'http'
 import { Server } from 'socket.io'
 import { ioConnectionConfig, createSocketServer } from '@config/socket'
 import { disconnectAllSocketHandler } from '@utils/socket.handler'
+import { Token } from '@customTypes/auth.type'
 
 dotenv.config()
 
@@ -25,6 +26,7 @@ declare global {
     namespace Express {
         export interface Request {
             io: Server
+            user: Token
         }
 
         export interface Response {}

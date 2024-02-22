@@ -5,9 +5,8 @@ import * as Error from '@libs/errors'
 import { Request, Response } from 'express'
 import { UploadedFile } from 'express-fileupload'
 import * as AuthHelper from '@utils/auth.helper'
-import { verifyToken } from '@utils/auth.helper'
 import { AccountTypes } from '@libs/accountTypes'
-import { LoginUser, Token, User, Users } from '@customTypes/auth.type'
+import { LoginUser, User, Users } from '@customTypes/auth.type'
 import { logger } from '@config/logger'
 import { Key } from '@customTypes/key.type'
 import { upload } from '@utils/file.helper'
@@ -104,9 +103,7 @@ export const user = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const token: string = request.cookies.JWT
-        const { id }: Token = verifyToken(token, 'accessToken')
-        const userData: User | null = await AuthService.getUser(id)
+        const userData: User | null = await AuthService.getUser(request.user.id)
         return response.status(200).json({ result: userData, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -119,9 +116,10 @@ export const users = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const token: string = request.cookies.JWT
-        const { openDayId }: Token = verifyToken(token, 'accessToken')
-        const users: Users[] | null = await AuthService.getUsers(openDayId)
+        const users: Users[] | null = await AuthService.getUsers(
+            request.user.openDayId
+        )
+
         return response.status(200).json({ result: users, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -183,13 +181,12 @@ export const usersByStatus = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const token: string = request.cookies.JWT
-        const tokenData: Token = verifyToken(token, 'accessToken')
         const status: boolean = request.params.status === 'active'
         const users: Users[] | null = await AuthService.getUsersByStatus(
-            tokenData.openDayId,
+            request.user.openDayId,
             status
         )
+
         return response.status(200).json({ result: users, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -202,10 +199,8 @@ export const updateProfilePicture = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const token: string = request.cookies.JWT
-        const tokenData: Token = verifyToken(token, 'accessToken')
         const picture: UploadedFile = request.files!.picture as UploadedFile
-        await upload(picture, tokenData.id)
+        await upload(picture, request.user.id)
         return response.status(201).json(Callback.savePhoto)
     } catch (error: any) {
         logger.error(`500 | ${error}`)

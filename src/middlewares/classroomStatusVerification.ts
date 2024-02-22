@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
-import * as AuthHelper from '@utils/auth.helper'
 import { Classroom, ShortClassroom } from '@customTypes/classroom.type'
 import { getClassroom } from '@services/classroom.service'
-import { Token, User } from '@customTypes/auth.type'
+import { User } from '@customTypes/auth.type'
 import { Group } from '@customTypes/group.type'
 import { ClassroomStatusEnum } from '@libs/classroomStatusEnum'
 import { getUser } from '@services/auth.service'
@@ -19,11 +18,6 @@ export const classroomStatusVerification = async (
     response: Response,
     next: NextFunction
 ): Promise<void> => {
-    const { id, accountType }: Token = AuthHelper.verifyToken(
-        request.cookies.JWT,
-        'accessToken'
-    )
-
     const classroomId = request.body.id
     const status = request.body.status
 
@@ -31,8 +25,8 @@ export const classroomStatusVerification = async (
         await isClassroomStatusVerified(
             classroomId,
             status,
-            id,
-            accountType.name
+            request.user.id,
+            request.user.accountType.name
         )
 
     if (classroomStatusVerification.verified) {

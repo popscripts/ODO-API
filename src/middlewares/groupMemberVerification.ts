@@ -1,23 +1,21 @@
-import { ShortUser, Token } from '@customTypes/auth.type'
-import { verifyToken } from '@utils/auth.helper'
 import * as GroupService from '@services/group.service'
 import { Request, NextFunction, Response } from 'express'
 import * as Error from '@libs/errors'
+import { Member } from '@customTypes/group.type'
 
 export const isUserMemberOfGroupVerification = async (
     request: Request,
     response: Response,
     next: NextFunction
 ): Promise<void> => {
-    const tokenData: Token = verifyToken(request.cookies.JWT, 'accessToken')
     const groupId: number = request.body.id
 
     let verified: boolean = await GroupService.isUserMemberOfGroup(
-        tokenData.id,
+        request.user.id,
         groupId
     )
 
-    if (tokenData.accountType.name === 'admin') {
+    if (request.user.accountType.name === 'admin') {
         verified = true
     }
 
@@ -33,7 +31,7 @@ export const isUserMemberOfAnyOtherGroupVerification = async (
     response: Response,
     next: NextFunction
 ): Promise<void> => {
-    const groupMembers: ShortUser[] = request.body.groupMembers
+    const groupMembers: Member[] = request.body.groupMembers
     let isMember: boolean = false
 
     for (const groupMembersKey in groupMembers) {
