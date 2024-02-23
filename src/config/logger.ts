@@ -2,6 +2,7 @@ import morgan from 'morgan'
 import moment from 'moment-timezone'
 import winston from 'winston'
 import * as dotenv from 'dotenv'
+import DailyRotateFile from 'winston-daily-rotate-file'
 
 dotenv.config()
 
@@ -28,11 +29,10 @@ export const logger = winston.createLogger({
         process.env.ODO_ENV === 'prod'
             ? [
                   new winston.transports.Console(),
-                  new winston.transports.File({
-                      filename: 'logs/error.log',
-                      level: 'error'
-                  }),
-                  new winston.transports.File({ filename: 'logs/all.log' })
+                  new DailyRotateFile({
+                      filename: 'logs/ODO-API-T%DATE%-00.log',
+                      datePattern: 'HH'
+                  })
               ]
             : [new winston.transports.Console()]
 })

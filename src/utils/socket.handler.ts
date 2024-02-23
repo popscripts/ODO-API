@@ -24,7 +24,8 @@ export const socketEventLogger = (
 ): void => {
     logger.log(
         'socket',
-        `${event[SocketEnum.EventName]} - SocketID: ${socket.id}`
+        `${event[SocketEnum.EventName]} | SocketID: ${socket.id}`
     )
+
     next()
 }
