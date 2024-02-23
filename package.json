@@ -30,7 +30,8 @@
     "socket.io": "^4.7.2",
     "ttsc": "^0.3.1",
     "typescript-transform-paths": "^3.4.6",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.2.0",
