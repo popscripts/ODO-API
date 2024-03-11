@@ -1,6 +1,7 @@
 import { db } from '@utils/db.server'
 import { hashPassword } from '@utils/auth.helper'
-import * as AuthType from '@customTypes//auth.type'
+import * as AuthType from '@customTypes/auth.type'
+import { faker } from '@faker-js/faker'
 
 export const register = async (registerData: AuthType.NewUser) => {
     const { openDayId, username, password } = registerData
@@ -9,7 +10,12 @@ export const register = async (registerData: AuthType.NewUser) => {
         data: {
             openDayId,
             username,
-            password: hashedPassword
+            password: hashedPassword,
+            Socket: {
+                create: {
+                    id: faker.string.hexadecimal({ length: 8 })
+                }
+            }
         }
     })
 }
@@ -54,6 +60,12 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
             id
         },
         select: {
+            Socket: {
+                select: {
+                    id: true,
+                    connected: true
+                }
+            },
             id: true,
             openDayId: true,
             username: true,
@@ -76,12 +88,20 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
             Group: {
                 select: {
                     id: true,
+                    openDayId: true,
                     groupSize: true,
                     GroupMembers: {
                         select: {
                             id: true,
                             username: true,
-                            name: true
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            },
+                            pictureName: true
                         }
                     },
                     description: true,
@@ -92,14 +112,9 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
                             classroom: true,
                             title: true,
                             description: true,
-                            managedBy: {
-                                select: {
-                                    id: true,
-                                    username: true,
-                                    name: true
-                                }
-                            },
-                            status: true
+                            status: true,
+                            reservedAt: true,
+                            takenAt: true
                         }
                     },
                     Taken: {
@@ -109,14 +124,16 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
                             classroom: true,
                             title: true,
                             description: true,
-                            managedBy: {
-                                select: {
-                                    id: true,
-                                    username: true,
-                                    name: true
-                                }
-                            },
-                            status: true
+                            status: true,
+                            reservedAt: true,
+                            takenAt: true
+                        }
+                    },
+                    GroupVisitedClassrooms: {
+                        select: {
+                            id: true,
+                            groupId: true,
+                            classroomId: true
                         }
                     }
                 }
@@ -247,8 +264,8 @@ export const saveProfilePictureToDatabase = async (
 
 export const getProfilePictureName = async (
     id: number
-): Promise<AuthType.PictureName | null> => {
-    return db.user.findUnique({
+): Promise<string | null> => {
+    const result = await db.user.findUnique({
         where: {
             id
         },
@@ -256,6 +273,12 @@ export const getProfilePictureName = async (
             pictureName: true
         }
     })
+
+    if (result?.pictureName) {
+        return result?.pictureName
+    }
+
+    return null
 }
 
 export const updatePersonalData = async (id: number, name: string) => {

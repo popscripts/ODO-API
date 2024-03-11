@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv'
-import express from 'express'
+import express, { Express } from 'express'
 import cors from 'cors'
 import { routerConfig } from '@config/router'
 import { dbHealthCheck } from '@utils/db.healthcheck'
@@ -7,9 +7,11 @@ import cookieParser from 'cookie-parser'
 import { cronConfig } from '@config/cron'
 import { logger, morganMiddleware } from '@config/logger'
 import fileUpload from 'express-fileupload'
-import { Server as httpServer } from 'http'
+import { Server as httpServer, createServer } from 'http'
 import { Server } from 'socket.io'
-import { ioConnectionConfig, socketConfig } from '@config/socket'
+import { ioConnectionConfig, createSocketServer } from '@config/socket'
+import { disconnectAllSocketHandler } from '@utils/socket.handler'
+import { Token } from '@customTypes/auth.type'
 
 dotenv.config()
 
@@ -18,31 +20,51 @@ if (!process.env.PORT) {
     process.exit(1)
 }
 
-dbHealthCheck()
+const PORT: number = parseInt(process.env.PORT, 10)
 
-const PORT: number = parseInt(process.env.PORT as string, 10)
-
-const app = express()
-app.use(cors())
-app.use(
-    fileUpload({
-        createParentPath: true,
-        limits: {
-            fileSize: 2 * 1024 * 1024 * 1024 //2MB max file(s) size
+declare global {
+    namespace Express {
+        export interface Request {
+            io: Server
+            user: Token
         }
-    })
-)
-app.use(express.json())
-app.use(cookieParser())
-app.use(morganMiddleware)
-routerConfig(app)
-if (process.env.ODO_ENV === 'prod') {
-    cronConfig()
+
+        export interface Response {}
+    }
 }
 
-const server: httpServer = app.listen(PORT, () => {
-    logger.info('Server started!')
-})
+dbHealthCheck().then(() => {
+    const app: Express = express()
 
-const io: Server = socketConfig(server)
-ioConnectionConfig(io)
+    const io: Server = createSocketServer()
+
+    ioConnectionConfig(app, io)
+
+    app.use(cors())
+    app.use(
+        fileUpload({
+            createParentPath: true,
+            limits: {
+                fileSize: 2 * 1024 * 1024 * 1024
+            }
+        })
+    )
+
+    app.use(express.json())
+    app.use(cookieParser())
+    app.use(morganMiddleware)
+    routerConfig(app)
+    cronConfig()
+
+    const server: httpServer = createServer(app)
+
+    io.attach(server)
+
+    disconnectAllSocketHandler(io).then(() =>
+        logger.info('Disconnected all Sockets')
+    )
+
+    server.listen(PORT, (): void => {
+        logger.info(`Server started on :${PORT}`)
+    })
+})

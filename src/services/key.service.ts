@@ -1,5 +1,5 @@
 import { db } from '@utils/db.server'
-import * as KeyType from '@customTypes/key.types'
+import * as KeyType from '@customTypes/key.type'
 
 export const listKeys = async (): Promise<KeyType.Key[]> => {
     return db.key.findMany({

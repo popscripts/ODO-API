@@ -3,7 +3,11 @@ import * as Error from '@libs/errors'
 import * as AuthHelper from '@utils/auth.helper'
 import { Token } from '@customTypes/auth.type'
 
-export const authorize = async (request: Request, response: Response, next: NextFunction) => {
+export const authorize = async (
+    request: Request,
+    response: Response,
+    next: NextFunction
+) => {
     try {
         // Get tokens from cookie
         const { JWT, refreshToken } = request.cookies
@@ -17,9 +21,14 @@ export const authorize = async (request: Request, response: Response, next: Next
         const difference: number = exp.getTime() - now.getTime()
         const minutes: number = Math.round(difference / 60000)
 
+        request.user = tokenData
+
         if (refreshToken && minutes < 15) {
             // Verify refresh token and get refresh token data
-            const refreshTokenData: Token = await AuthHelper.verifyToken(refreshToken, 'refreshToken')
+            const refreshTokenData: Token = AuthHelper.verifyToken(
+                refreshToken,
+                'refreshToken'
+            )
             // Check the user of refresh token
             if (refreshTokenData.id === tokenData.id) {
                 const newTokenData = {
@@ -29,8 +38,10 @@ export const authorize = async (request: Request, response: Response, next: Next
                     accountType: tokenData.accountType
                 }
                 // Generate new tokens
-                const newAccessToken: string = AuthHelper.generateToken(newTokenData)
-                const newRefreshToken: string = AuthHelper.generateRefreshToken(newTokenData)
+                const newAccessToken: string =
+                    AuthHelper.generateToken(newTokenData)
+                const newRefreshToken: string =
+                    AuthHelper.generateRefreshToken(newTokenData)
 
                 // Set response cookies
                 response.cookie('JWT', newAccessToken, {
