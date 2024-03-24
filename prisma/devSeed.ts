@@ -20,7 +20,8 @@ const devSeed = async () => {
                         create: {
                             id: faker.string.hexadecimal({ length: 8 })
                         }
-                    }
+                    },
+                    name: getUserName()
                 }
             })
         })
@@ -53,7 +54,8 @@ const devSeed = async () => {
                     create: {
                         id: faker.string.hexadecimal({ length: 8 })
                     }
-                }
+                },
+                name: admin.username
             }
         })
     })
@@ -112,5 +114,9 @@ const CLASSROOMS: NewClassroom[] = faker.helpers.multiple(
         count: 5
     }
 )
+
+const getUserName = (): string => {
+    return faker.person.firstName() + ' ' + faker.person.lastName()
+}
 
 devSeed()
