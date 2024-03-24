@@ -133,8 +133,7 @@ export const editUser = async (
 ): Promise<Response> => {
     try {
         const { id, username, accountType, shouldLogout } = request.body
-        const parsedAccountType = AccountTypes[accountType]
-        await AuthService.editUser(id, username, parsedAccountType)
+        await AuthService.editUser(id, username, AccountTypes[accountType])
 
         if (shouldLogout) {
             await callLogout(request.io, id)

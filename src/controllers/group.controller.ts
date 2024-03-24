@@ -6,6 +6,10 @@ import * as Callbacks from '@libs/callbacks'
 import { Group, Member } from '@customTypes/group.type'
 import { Server } from 'socket.io'
 import { ShortUser } from '@customTypes/auth.type'
+import { setClassroomStatus } from '@utils/status.helper'
+import { ClassroomStatusEnum } from '@libs/classroomStatusEnum'
+import { AccountTypes } from '@libs/accountTypes'
+import { deleteTempUser } from '@services/auth.service'
 
 export const getGroups = async (
     request: Request,
@@ -95,6 +99,30 @@ export const deleteGroup = async (
 ): Promise<Response> => {
     try {
         const { id } = request.body
+        const group: Group | null = await GroupService.getGroup(id)
+
+        if (group?.Taken) {
+            await setClassroomStatus(
+                group.Taken.id,
+                ClassroomStatusEnum[ClassroomStatusEnum.free],
+                request.user.id
+            )
+        }
+
+        if (group?.Reserved) {
+            await setClassroomStatus(
+                group.Reserved.id,
+                ClassroomStatusEnum[ClassroomStatusEnum.free],
+                request.user.id
+            )
+        }
+
+        group?.GroupMembers?.map(async (member: ShortUser) => {
+            if (member.accountType.id === AccountTypes.temp) {
+                await deleteTempUser(member.id)
+            }
+        })
+
         await GroupService.deleteGroup(id)
         emitDeletedGroup(request.io, id)
 
