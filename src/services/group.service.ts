@@ -191,6 +191,13 @@ export const updateGroup = async (
 }
 
 export const deleteGroup = async (id: number) => {
+    await db.user.deleteMany({
+        where: {
+            groupId: id,
+            accountTypeId: AccountTypes['temp']
+        }
+    })
+
     return db.group.delete({
         where: {
             id
@@ -287,7 +294,7 @@ export const isUserMemberOfAnyGroup = async (id: number): Promise<boolean> => {
     return !isNotAMember
 }
 
-export const getMembersList = async (): Promise<Member[]> => {
+export const getMemberList = async (): Promise<Member[]> => {
     return db.user.findMany({
         select: {
             id: true,

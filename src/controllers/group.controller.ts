@@ -8,8 +8,8 @@ import { Server } from 'socket.io'
 import { ShortUser } from '@customTypes/auth.type'
 import { setClassroomStatus } from '@utils/status.helper'
 import { ClassroomStatusEnum } from '@libs/classroomStatusEnum'
-import { AccountTypes } from '@libs/accountTypes'
-import { deleteTempUser } from '@services/auth.service'
+import { emitClassroomStatus } from '@controllers/classroom.controller'
+import { ClassroomStatusEvent } from '@customTypes/classroom.type'
 
 export const getGroups = async (
     request: Request,
@@ -99,30 +99,8 @@ export const deleteGroup = async (
 ): Promise<Response> => {
     try {
         const { id } = request.body
-        const group: Group | null = await GroupService.getGroup(id)
 
-        if (group?.Taken) {
-            await setClassroomStatus(
-                group.Taken.id,
-                ClassroomStatusEnum[ClassroomStatusEnum.free],
-                request.user.id
-            )
-        }
-
-        if (group?.Reserved) {
-            await setClassroomStatus(
-                group.Reserved.id,
-                ClassroomStatusEnum[ClassroomStatusEnum.free],
-                request.user.id
-            )
-        }
-
-        group?.GroupMembers?.map(async (member: ShortUser) => {
-            if (member.accountType.id === AccountTypes.temp) {
-                await deleteTempUser(member.id)
-            }
-        })
-
+        await handleDeletedGroupClassroom(id, request.user.id, request.io)
         await GroupService.deleteGroup(id)
         emitDeletedGroup(request.io, id)
 
@@ -184,13 +162,13 @@ export const deleteGroupVisitedClassroom = async (
     }
 }
 
-export const getMembersList = async (
+export const getMemberList = async (
     request: Request,
     response: Response
 ): Promise<Response> => {
     try {
-        const membersList: Member[] = await GroupService.getMembersList()
-        return response.status(200).json({ result: membersList, error: 0 })
+        const memberList: Member[] = await GroupService.getMemberList()
+        return response.status(200).json({ result: memberList, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
         return response.status(500).json(Error.getMembersListError)
@@ -251,5 +229,46 @@ const emitDeletedGroupVisitedClassroom = async (
             'socket',
             `emitDeletedGroupVisitedClassroom ${error.message} | error: ${1}`
         )
+    }
+}
+
+const handleDeletedGroupClassroom = async (
+    id: number,
+    userId: number,
+    io: Server
+): Promise<void> => {
+    const group: Group | null = await GroupService.getGroup(id)
+
+    let socketData: ClassroomStatusEvent = {
+        id: 0,
+        status: ClassroomStatusEnum[ClassroomStatusEnum.free],
+        prevStatus: '',
+        userId
+    }
+
+    if (group?.Taken) {
+        await setClassroomStatus(
+            group.Taken.id,
+            ClassroomStatusEnum[ClassroomStatusEnum.free],
+            id
+        )
+
+        socketData.id = group.Taken.id
+        socketData.prevStatus = ClassroomStatusEnum[ClassroomStatusEnum.busy]
+        await emitClassroomStatus(io, socketData)
+    }
+
+    if (group?.Reserved) {
+        await setClassroomStatus(
+            group.Reserved.id,
+            ClassroomStatusEnum[ClassroomStatusEnum.free],
+            id
+        )
+
+        socketData.id = group.Reserved.id
+        socketData.prevStatus =
+            ClassroomStatusEnum[ClassroomStatusEnum.reserved]
+
+        await emitClassroomStatus(io, socketData)
     }
 }
