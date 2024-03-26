@@ -30,8 +30,9 @@ export const logger = winston.createLogger({
             ? [
                   new winston.transports.Console(),
                   new DailyRotateFile({
-                      filename: 'logs/ODO-API-T%DATE%-00.log',
-                      datePattern: 'HH'
+                      filename: 'logs/ODO-API-T%DATE%.log',
+                      datePattern: 'HH-mm',
+                      frequency: '30m'
                   })
               ]
             : [new winston.transports.Console()]
@@ -41,9 +42,8 @@ const stream = {
     write: (message: any) => logger.http(message.trim())
 }
 
-const skip = () => {
-    const env = process.env.NODE_ENV || 'development'
-    return env !== 'development'
+const skip = (request: any) => {
+    return request.originalUrl.startsWith('/api/dynamic-content')
 }
 
 morgan.token('date', (req, res, tz) => {
