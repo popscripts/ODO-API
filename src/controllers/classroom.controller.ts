@@ -80,6 +80,8 @@ export const deleteClassroom = async (
     try {
         const id: number = request.body.id
         await ClassroomService.deleteClassroom(id)
+        emitDeletedClassroom(request.io, id)
+
         return response.status(200).json(Callback.deleteClassroom)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -94,6 +96,8 @@ export const restoreClassroom = async (
     try {
         const id: number = request.body.id
         await ClassroomService.restoreClassroom(id)
+        await emitClassroom(request.io, id)
+
         return response.status(200).json(Callback.restoreClassroom)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -186,5 +190,20 @@ const emitClassroom = async (
         logger.log('socket', `Classroom ${classroomId} data emitted`)
     } catch (error: any) {
         logger.log('socket', `emitClassroom ${error.message} | error: ${1}`)
+    }
+}
+
+const emitDeletedClassroom = (io: Server, classroomId: number): void => {
+    try {
+        io.emit('classroomDeleted', {
+            classroomId
+        })
+
+        logger.log('socket', `Deleted classroom ${classroomId} ID emitted`)
+    } catch (error: any) {
+        logger.log(
+            'socket',
+            `emitDeletedClassroom ${error.message} | error: ${1}`
+        )
     }
 }
