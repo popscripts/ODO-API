@@ -45,6 +45,11 @@ export const loadProfilePictureError: JsonResponse = {
     error: 1
 }
 
+export const fileNotExistError: JsonResponse = {
+    result: 'Zdjęcie nie istnieje',
+    error: 1
+}
+
 export const deactivateKeyError: JsonResponse = {
     result: 'Wystąpił błąd podczas deaktywacji klucza',
     error: 1
