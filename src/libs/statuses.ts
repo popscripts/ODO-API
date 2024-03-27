@@ -7,3 +7,9 @@ export const statuses: Record<string, any> = {
     pickedUp: 6,
     cancelled: 7
 }
+
+export enum ClassroomStatusEnum {
+    free = 1,
+    busy = 2,
+    reserved = 3
+}

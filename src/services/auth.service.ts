@@ -32,12 +32,7 @@ export const login = async (
             openDayId: true,
             username: true,
             password: true,
-            accountType: {
-                select: {
-                    id: true,
-                    name: true
-                }
-            }
+            accountType: true
         }
     })
 }
@@ -70,12 +65,7 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
             openDayId: true,
             username: true,
             name: true,
-            accountType: {
-                select: {
-                    id: true,
-                    name: true
-                }
-            },
+            accountType: true,
             pictureName: true,
             ManagedClassroom: {
                 select: {
@@ -101,7 +91,8 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     description: true,
@@ -288,6 +279,14 @@ export const updatePersonalData = async (id: number, name: string) => {
         },
         data: {
             name
+        }
+    })
+}
+
+export const deleteTempUser = async (id: number) => {
+    return db.user.delete({
+        where: {
+            id
         }
     })
 }

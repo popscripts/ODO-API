@@ -25,7 +25,8 @@ export const listClassrooms = async (
                             connected: true
                         }
                     },
-                    pictureName: true
+                    pictureName: true,
+                    accountType: true
                 }
             },
             status: true,
@@ -44,7 +45,8 @@ export const listClassrooms = async (
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -65,7 +67,8 @@ export const listClassrooms = async (
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -186,7 +189,8 @@ export const listClassroomsByStatus = async (
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    accountType: true
                 }
             },
             status: true,
@@ -205,7 +209,8 @@ export const listClassroomsByStatus = async (
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -226,7 +231,8 @@ export const listClassroomsByStatus = async (
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -260,7 +266,8 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    accountType: true
                 }
             },
             status: true,
@@ -279,7 +286,8 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -300,7 +308,8 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,

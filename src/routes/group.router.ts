@@ -64,7 +64,7 @@ groupRouter.get(
 )
 
 /**
- * POST: Add group visited classroom
+ * POST: Add a group visited classroom
  * Params: ID (groupId), classroomId
  */
 groupRouter.post(
@@ -76,7 +76,7 @@ groupRouter.post(
 )
 
 /**
- * POST: Delete group visited classroom
+ * POST: Delete a group visited classroom
  * Params: ID (groupId), classroomId
  */
 groupRouter.delete(
@@ -87,11 +87,11 @@ groupRouter.delete(
 )
 
 /**
- * GET: Get list of users for add group member select
+ * GET: Get a list of users for add group member select
  */
-groupRouter.get('/members-list', authorize, GroupController.getMembersList)
+groupRouter.get('/members-list', authorize, GroupController.getMemberList)
 
 /**
- * GET: Get group by ID
+ * GET: Get a group by ID
  */
 groupRouter.get('/:id', authorize, GroupController.getGroup)

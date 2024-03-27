@@ -147,7 +147,7 @@ export const changeClassroomStatus = async (
     }
 }
 
-const emitClassroomStatus = async (
+export const emitClassroomStatus = async (
     io: Server,
     data: ClassroomStatusEvent
 ): Promise<void> => {

@@ -1,49 +1,98 @@
 import * as ClassroomService from '@services/classroom.service'
 import { Classroom } from '@customTypes/classroom.type'
+import { ClassroomStatusEnum } from '@libs/statuses'
 
-export const setClassroomStatus = async (id: number, status: string, userId: number) => {
+export const setClassroomStatus = async (
+    id: number,
+    status: string,
+    groupId: number
+): Promise<void> => {
     const date: Date = new Date()
     const classroom: Classroom | null = await ClassroomService.getClassroom(id)
+
     switch (status) {
         case 'free':
-            // Check if classroom is busy and isn't reserved
-            if (classroom?.status.name === 'busy' && classroom?.reservedBy === null) {
+            if (isClassroomBusyAndNotReserved(classroom)) {
                 await ClassroomService.setFreeStatus(id)
                 break
             }
 
-            // Check if classroom is busy and reserved by the user
-            if (classroom?.status.name === 'busy' && classroom.reservedBy?.id === userId) {
+            if (isClassroomBusyAndReservedByTheGroup(classroom, groupId)) {
                 await ClassroomService.cancelReservation(id)
                 break
             }
 
-            if (classroom?.reservedBy !== null && classroom?.status.name !== 'busy') {
+            if (isClassroomNotReservedAndNotBusy(classroom)) {
                 await ClassroomService.setFreeStatus(id)
                 break
             }
 
-            // Check if classroom is reserved
-            if (classroom?.reservedBy !== null) {
+            if (isClassroomReserved(classroom)) {
                 await ClassroomService.setFreeWhenReserved(id)
                 break
             }
+
             break
         case 'busy':
-            if (classroom?.status.name === 'reserved') {
-                await ClassroomService.setBusyClassroomWhenReserved(id, userId, date)
+            if (isClassroomReserved(classroom)) {
+                await ClassroomService.setBusyClassroomWhenReserved(
+                    id,
+                    groupId,
+                    date
+                )
+
                 break
             } else {
-                await ClassroomService.setBusyStatus(id, userId, date)
+                await ClassroomService.setBusyStatus(id, groupId, date)
                 break
             }
         case 'reserved':
-            if (classroom?.status.name === 'busy') {
-                await ClassroomService.setReservedStatusWhenBusy(id, userId, date)
+            if (isClassroomBusy(classroom)) {
+                await ClassroomService.setReservedStatusWhenBusy(
+                    id,
+                    groupId,
+                    date
+                )
+
                 break
             } else {
-                await ClassroomService.setReservedStatus(id, userId, date)
+                await ClassroomService.setReservedStatus(id, groupId, date)
                 break
             }
     }
+}
+
+const isClassroomBusyAndNotReserved = (
+    classroom: Classroom | null
+): boolean => {
+    return (
+        classroom?.status.id === ClassroomStatusEnum.busy &&
+        classroom?.reservedAt === null
+    )
+}
+const isClassroomBusyAndReservedByTheGroup = (
+    classroom: Classroom | null,
+    groupId: number
+): boolean => {
+    return (
+        classroom?.status.id === ClassroomStatusEnum.busy &&
+        classroom.reservedBy?.id === groupId
+    )
+}
+
+const isClassroomNotReservedAndNotBusy = (
+    classroom: Classroom | null
+): boolean => {
+    return (
+        classroom?.reservedAt !== null &&
+        classroom?.status.id !== ClassroomStatusEnum.busy
+    )
+}
+
+const isClassroomReserved = (classroom: Classroom | null): boolean => {
+    return classroom?.reservedAt !== null
+}
+
+const isClassroomBusy = (classroom: Classroom | null): boolean => {
+    return classroom?.takenAt !== null
 }
