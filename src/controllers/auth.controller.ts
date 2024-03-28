@@ -11,6 +11,7 @@ import { logger } from '@config/logger'
 import { Key } from '@customTypes/key.type'
 import { upload } from '@utils/file.helper'
 import { Server } from 'socket.io'
+import fs from 'fs'
 
 export const register = async (
     request: Request,
@@ -212,10 +213,13 @@ export const getPicture = async (
     response: Response
 ): Promise<void | Response> => {
     try {
-        const pictureId: string = request.params.id
-        return response
-            .status(200)
-            .sendFile('/uploads/' + pictureId, { root: '.' })
+        const picturePath: string = './uploads/' + request.params.id + '.png'
+
+        if (!fs.existsSync(picturePath)) {
+            return response.status(404).json(Error.fileNotExistError)
+        }
+
+        return response.status(200).sendFile(picturePath, { root: '.' })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
         return response.status(500).json(Error.loadProfilePictureError)
