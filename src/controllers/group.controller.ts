@@ -269,11 +269,6 @@ const emitGroupVisitedClassroomAction = async (
             })
         }
 
-        console.log({
-            classroomId,
-            action: GroupVisitedClassroomActionEnum[action]
-        })
-
         logger.log(
             'socket',
             `Action ${GroupVisitedClassroomActionEnum[action]} with classroom ${classroomId} for group ${groupId} emitted`
