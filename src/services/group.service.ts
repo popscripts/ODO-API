@@ -251,6 +251,9 @@ export const getGroupVisitedClassrooms = async (groupId: number) => {
     return db.groupVisitedClassroom.findMany({
         where: {
             groupId
+        },
+        select: {
+            classroomId: true
         }
     })
 }
