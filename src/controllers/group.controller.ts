@@ -10,7 +10,10 @@ import { setClassroomStatus } from '@utils/status.helper'
 import { ClassroomStatusEnum } from '@libs/classroomStatusEnum'
 import { emitClassroomStatus } from '@controllers/classroom.controller'
 import { ClassroomStatusEvent } from '@customTypes/classroom.type'
-import { GroupActionEnum } from '@libs/GroupActionEnum'
+import {
+    GroupActionEnum,
+    GroupVisitedClassroomActionEnum
+} from '@libs/GroupActionEnum'
 
 export const getGroups = async (
     request: Request,
@@ -118,8 +121,14 @@ export const addGroupVisitedClassroom = async (
 ): Promise<Response> => {
     try {
         const { id, classroomId } = request.body
-
         await GroupService.addGroupVisitedClassroom(id, classroomId)
+
+        await emitGroupVisitedClassroomAction(
+            request.io,
+            id,
+            classroomId,
+            GroupVisitedClassroomActionEnum.visit
+        )
 
         return response.status(201).json(Callbacks.addGroupVisitedClassroom)
     } catch (error: any) {
@@ -137,9 +146,15 @@ export const getGroupVisitedClassroom = async (
         const groupVisitedClassrooms =
             await GroupService.getGroupVisitedClassrooms(id)
 
+        let parsedGroupVisitedClassrooms: number[] = groupVisitedClassrooms
+            .map((value) => {
+                return Object.values(value)
+            })
+            .flat()
+
         return response
             .status(200)
-            .json({ result: groupVisitedClassrooms, error: 0 })
+            .json({ result: parsedGroupVisitedClassrooms, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
         return response.status(500).json(Error.getGroupVisitedClassroomsError)
@@ -154,7 +169,12 @@ export const deleteGroupVisitedClassroom = async (
         const { id, classroomId } = request.body
         await GroupService.deleteGroupVisitedClassroom(id, classroomId)
 
-        await emitDeletedGroupVisitedClassroom(request.io, id, classroomId)
+        await emitGroupVisitedClassroomAction(
+            request.io,
+            id,
+            classroomId,
+            GroupVisitedClassroomActionEnum.delete
+        )
 
         return response.status(200).json(Callbacks.deleteGroupVisitedClassroom)
     } catch (error: any) {
@@ -206,10 +226,14 @@ const emitGroup = async (io: Server, groupId: number): Promise<void> => {
     }
 }
 
-const emitGroupAction = (io: Server, groupId: number, action: number): void => {
+const emitGroupAction = (
+    io: Server,
+    groupId: number,
+    action: GroupActionEnum
+): void => {
     try {
         io.emit('groupAction', {
-            groupId,
+            id: groupId,
             action: GroupActionEnum[action]
         })
 
@@ -222,10 +246,11 @@ const emitGroupAction = (io: Server, groupId: number, action: number): void => {
     }
 }
 
-const emitDeletedGroupVisitedClassroom = async (
+const emitGroupVisitedClassroomAction = async (
     io: Server,
     groupId: number,
-    classroomId: number
+    classroomId: number,
+    action: GroupVisitedClassroomActionEnum
 ): Promise<void> => {
     try {
         const group: Group | null = await GroupService.getGroup(groupId)
@@ -235,7 +260,10 @@ const emitDeletedGroupVisitedClassroom = async (
                 if (groupMember.Socket?.id) {
                     io.to(groupMember.Socket?.id).emit(
                         'groupVisitedClassroomDeleted',
-                        classroomId
+                        {
+                            classroomId,
+                            action: GroupVisitedClassroomActionEnum[action]
+                        }
                     )
                 }
             })
@@ -243,7 +271,7 @@ const emitDeletedGroupVisitedClassroom = async (
 
         logger.log(
             'socket',
-            `Deleted group visited classroom ${classroomId} for group ${groupId} emitted`
+            `Action ${GroupVisitedClassroomActionEnum[action]} with classroom ${classroomId} for group ${groupId} emitted`
         )
     } catch (error: any) {
         logger.log(
