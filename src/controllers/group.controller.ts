@@ -10,6 +10,7 @@ import { setClassroomStatus } from '@utils/status.helper'
 import { ClassroomStatusEnum } from '@libs/classroomStatusEnum'
 import { emitClassroomStatus } from '@controllers/classroom.controller'
 import { ClassroomStatusEvent } from '@customTypes/classroom.type'
+import { GroupActionEnum } from '@libs/GroupActionEnum'
 
 export const getGroups = async (
     request: Request,
@@ -102,7 +103,7 @@ export const deleteGroup = async (
 
         await handleDeletedGroupClassroom(id, request.user.id, request.io)
         await GroupService.deleteGroup(id)
-        emitDeletedGroup(request.io, id)
+        emitGroupAction(request.io, id, GroupActionEnum.delete)
 
         return response.status(200).json(Callbacks.deleteGroup)
     } catch (error: any) {
@@ -175,6 +176,22 @@ export const getMemberList = async (
     }
 }
 
+export const leaveGroup = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
+    try {
+        const groupId: number = parseInt(request.params.id)
+        await GroupService.leaveGroup(request.user.id)
+        emitGroupAction(request.io, groupId, GroupActionEnum.leave)
+
+        return response.status(201).json(Callbacks.leaveGroup)
+    } catch (error: any) {
+        logger.error(`500 | ${error}`)
+        return response.status(500).json(Error.leaveGroup)
+    }
+}
+
 const emitGroup = async (io: Server, groupId: number): Promise<void> => {
     try {
         const group: Group | null = await GroupService.getGroup(groupId)
@@ -189,13 +206,17 @@ const emitGroup = async (io: Server, groupId: number): Promise<void> => {
     }
 }
 
-const emitDeletedGroup = (io: Server, groupId: number): void => {
+const emitGroupAction = (io: Server, groupId: number, action: number): void => {
     try {
-        io.emit('groupDeleted', {
-            groupId
+        io.emit('groupAction', {
+            groupId,
+            action: GroupActionEnum[action]
         })
 
-        logger.log('socket', `Deleted group ${groupId} ID emitted`)
+        logger.log(
+            'socket',
+            `Action ${GroupActionEnum[action]} for group ${groupId} emitted`
+        )
     } catch (error: any) {
         logger.log('socket', `emitDeletedGroup ${error.message} | error: ${1}`)
     }

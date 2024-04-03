@@ -129,3 +129,8 @@ export const deleteGroupVisitedClassroom: JsonResponse = {
     result: 'Pomyślnie usunięto klasę z odwiedzonych',
     error: 0
 }
+
+export const leaveGroup: JsonResponse = {
+    result: 'Pomyślnie opuszczono grupę',
+    error: 0
+}
