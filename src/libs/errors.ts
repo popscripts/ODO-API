@@ -139,3 +139,8 @@ export const getMembersListError: JsonResponse = {
     result: 'Wystąpił błąd podczas pobierania danych',
     error: 1
 }
+
+export const leaveGroup: JsonResponse = {
+    result: 'Wystąpił błąd podczas opuszczania grupy',
+    error: 1
+}

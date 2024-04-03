@@ -304,3 +304,22 @@ export const getMemberList = async (): Promise<Member[]> => {
         orderBy: [{ groupId: 'asc' }, { name: 'asc' }]
     })
 }
+
+export const getNumberOfMembers = async (groupId: number) => {
+    return db.user.count({
+        where: {
+            groupId
+        }
+    })
+}
+
+export const leaveGroup = async (id: number) => {
+    return db.user.update({
+        where: {
+            id
+        },
+        data: {
+            groupId: null
+        }
+    })
+}
