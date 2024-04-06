@@ -14,10 +14,11 @@ export const userIsNotAMemberOfAnyGroupResponse: classroomStatusVerificationType
         verified: false
     }
 
-export const classroomIsNotReservedByGroup: classroomStatusVerificationType = {
-    result: 'Klasa nie jest zarezerowana przez Twoją grupę',
-    verified: false
-}
+export const classroomIsNeitherTakenOrReservedByGroup: classroomStatusVerificationType =
+    {
+        result: 'Klasa nie jest zajęta lub zarezerowana przez Twoją grupę',
+        verified: false
+    }
 
 export const notVerifiedStatusResponse: classroomStatusVerificationType = {
     result: 'Zmiana statusu klasy jest niemożliwa',

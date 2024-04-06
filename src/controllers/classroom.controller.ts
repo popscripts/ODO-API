@@ -3,16 +3,14 @@ import { Request, Response } from 'express'
 import * as Error from '@libs/errors'
 import * as Callback from '@libs/callbacks'
 import { setClassroomStatus } from '@utils/status.helper'
-import { User } from '@customTypes/auth.type'
 import { logger } from '@config/logger'
 import {
     Classroom,
     ClassroomStatusEvent,
     GroupVisitedClassroom
 } from '@customTypes/classroom.type'
-import { getUser, getUserGroupId } from '@services/auth.service'
+import { getUserGroupId } from '@services/auth.service'
 import { Server } from 'socket.io'
-import { getClassroom } from '@services/classroom.service'
 import { ClassroomStatusEnum } from '@libs/statuses'
 import {
     addGroupVisitedClassroom,
@@ -82,6 +80,19 @@ export const groupedClassrooms = async (
         }
 
         return response.status(200).json({ result: classrooms, error: 0 })
+    } catch (error: any) {
+        logger.error(`500 | ${error}`)
+        return response.status(500).json(Error.responseError)
+    }
+}
+
+export const getClassroom = async (request: Request, response: Response) => {
+    try {
+        const classroom: Classroom | null = await ClassroomService.getClassroom(
+            parseInt(request.params.id)
+        )
+
+        return response.status(200).json({ result: classroom, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
         return response.status(500).json(Error.responseError)
@@ -192,30 +203,32 @@ export const changeClassroomStatus = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const { id, status, prevStatus, classroom, title } = request.body
-        const user: User | null = await getUser(request.user.id)
-        await setClassroomStatus(id, status, user!.Group!.id)
+        const { id, status, prevStatus } = request.body
 
-        const socketData: ClassroomStatusEvent = {
-            id,
-            status,
-            prevStatus,
-            userId: request.user.id
-        }
+        await setClassroomStatus(
+            request.body.classroom,
+            parseInt(ClassroomStatusEnum[status]),
+            request.body.group
+        )
 
         if (
             prevStatus === ClassroomStatusEnum[ClassroomStatusEnum.busy] &&
             status === ClassroomStatusEnum[ClassroomStatusEnum.free]
         ) {
             await addGroupVisitedClassroom(
-                user!.Group!.id,
+                request.body.group.id,
                 id,
-                classroom,
-                title
+                request.body.classroom.classroom,
+                request.body.classroom.title
             )
         }
 
-        await emitClassroomStatus(request.io, socketData)
+        emitClassroomStatus(request.io, {
+            id,
+            status,
+            prevStatus,
+            userId: request.user.id
+        })
 
         return response.status(201).json(Callback.changeStatus)
     } catch (error: any) {
@@ -224,10 +237,10 @@ export const changeClassroomStatus = async (
     }
 }
 
-export const emitClassroomStatus = async (
+export const emitClassroomStatus = (
     io: Server,
     data: ClassroomStatusEvent
-): Promise<void> => {
+): void => {
     try {
         const { id, status, prevStatus, userId } = data
         io.emit('classroomStatus', true)
@@ -249,7 +262,8 @@ const emitClassroom = async (
     classroomId: number
 ): Promise<void> => {
     try {
-        const classroom: Classroom | null = await getClassroom(classroomId)
+        const classroom: Classroom | null =
+            await ClassroomService.getClassroom(classroomId)
 
         io.emit('classroomUpdate', {
             classroom

@@ -277,28 +277,24 @@ const handleDeletedGroupClassroom = async (
     }
 
     if (group?.Taken) {
-        await setClassroomStatus(
-            group.Taken.id,
-            ClassroomStatusEnum[ClassroomStatusEnum.free],
-            id
-        )
+        await setClassroomStatus(group.Taken, ClassroomStatusEnum.free, group)
 
         socketData.id = group.Taken.id
         socketData.prevStatus = ClassroomStatusEnum[ClassroomStatusEnum.busy]
-        await emitClassroomStatus(io, socketData)
+        emitClassroomStatus(io, socketData)
     }
 
     if (group?.Reserved) {
         await setClassroomStatus(
-            group.Reserved.id,
-            ClassroomStatusEnum[ClassroomStatusEnum.free],
-            id
+            group.Reserved,
+            ClassroomStatusEnum.free,
+            group
         )
 
         socketData.id = group.Reserved.id
         socketData.prevStatus =
             ClassroomStatusEnum[ClassroomStatusEnum.reserved]
 
-        await emitClassroomStatus(io, socketData)
+        emitClassroomStatus(io, socketData)
     }
 }

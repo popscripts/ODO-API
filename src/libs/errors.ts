@@ -144,3 +144,8 @@ export const leaveGroup: JsonResponse = {
     result: 'Wystąpił błąd podczas opuszczania grupy',
     error: 1
 }
+
+export const classroomNotFoundError: JsonResponse = {
+    result: 'Nie odnaleziono podanej klasy',
+    error: 1
+}

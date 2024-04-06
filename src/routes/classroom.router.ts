@@ -90,7 +90,7 @@ classroomRouter.get(
 
 /**
  * PATCH: Change classroom status
- * Params: id (classroomId), status, classroom (name), title
+ * Params: id (classroomId), status
  */
 classroomRouter.patch(
     '/status',
@@ -98,3 +98,8 @@ classroomRouter.patch(
     classroomStatusVerification,
     ClassroomController.changeClassroomStatus
 )
+
+/**
+ * GET: Get classroom by ID
+ */
+classroomRouter.get('/:id', authorize, ClassroomController.getClassroom)
