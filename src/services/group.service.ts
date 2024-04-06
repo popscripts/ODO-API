@@ -310,7 +310,10 @@ export const isClassroomAlreadyVisited = async (
     return !!isVisited
 }
 
-export const isUserMemberOfAnyGroup = async (id: number): Promise<boolean> => {
+export const isUserMemberOfAnyGroup = async (
+    id: number,
+    groupId: number
+): Promise<boolean> => {
     if (id === 0) {
         return false
     }
@@ -318,7 +321,7 @@ export const isUserMemberOfAnyGroup = async (id: number): Promise<boolean> => {
     const isNotAMember: number = await db.user.count({
         where: {
             id,
-            groupId: null
+            OR: [{ groupId: null }, { groupId }]
         }
     })
 
@@ -339,7 +342,10 @@ export const getMemberList = async (): Promise<Member[]> => {
 export const getNumberOfMembers = async (groupId: number) => {
     return db.user.count({
         where: {
-            groupId
+            groupId,
+            accountTypeId: {
+                not: AccountTypes['temp']
+            }
         }
     })
 }

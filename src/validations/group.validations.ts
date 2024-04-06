@@ -18,7 +18,5 @@ const groupIdValidation: CustomValidator = async (id) => {
 }
 
 export const groupValidation: ValidationChain[] = [
-    body('id').custom(groupIdValidation),
-    body('classroom').isString().withMessage('Należy podać nazwę klasy'),
-    body('title').isString().withMessage('Należy podać tytuł klasy')
+    body('id').custom(groupIdValidation)
 ]
