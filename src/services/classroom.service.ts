@@ -1,5 +1,6 @@
 import { db } from '@utils/db.server'
 import { Classroom } from '@customTypes/classroom.type'
+import { ClassroomStatusEnum } from '@libs/statuses'
 
 export const listClassrooms = async (
     openDayId: number
@@ -412,7 +413,7 @@ export const setFreeStatus = async (id: number) => {
             id
         },
         data: {
-            statusId: 1,
+            statusId: ClassroomStatusEnum.free,
             takenById: null,
             takenAt: null,
             reservedById: null,
@@ -443,7 +444,7 @@ export const setBusyStatus = async (
             id
         },
         data: {
-            statusId: 2,
+            statusId: ClassroomStatusEnum.busy,
             takenById,
             takenAt
         }
@@ -460,7 +461,7 @@ export const setReservedStatus = async (
             id
         },
         data: {
-            statusId: 3,
+            statusId: ClassroomStatusEnum.reserved,
             reservedById,
             reservedAt
         }
@@ -493,7 +494,7 @@ export const setBusyClassroomWhenReserved = async (
             id
         },
         data: {
-            statusId: 2,
+            statusId: ClassroomStatusEnum.busy,
             reservedById: null,
             reservedAt: null,
             takenById,
@@ -508,7 +509,7 @@ export const setFreeWhenReserved = async (id: number) => {
             id
         },
         data: {
-            statusId: 3,
+            statusId: ClassroomStatusEnum.reserved,
             takenById: null,
             takenAt: null
         }
