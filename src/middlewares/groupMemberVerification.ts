@@ -32,12 +32,14 @@ export const isUserMemberOfAnyOtherGroupVerification = async (
     next: NextFunction
 ): Promise<void> => {
     const groupMembers: Member[] = request.body.groupMembers
+    const groupId: number = parseInt(request.body.id)
     let isMember: boolean = false
 
     for (const groupMembersKey in groupMembers) {
         if (
             await GroupService.isUserMemberOfAnyGroup(
-                groupMembers[groupMembersKey].id
+                groupMembers[groupMembersKey].id,
+                groupId
             )
         ) {
             isMember = true

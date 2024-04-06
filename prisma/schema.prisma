@@ -52,7 +52,7 @@ model Info {
   id        Int      @id @default(autoincrement())
   openDay   OpenDay  @relation(fields: [openDayId], references: [id])
   openDayId Int
-  content   String
+  content   String   @db.Text
   deleted   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
