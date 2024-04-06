@@ -3,7 +3,7 @@ import { Classroom, ShortClassroom } from '@customTypes/classroom.type'
 import { getClassroom } from '@services/classroom.service'
 import { User } from '@customTypes/auth.type'
 import { Group } from '@customTypes/group.type'
-import { ClassroomStatusEnum } from '@libs/classroomStatusEnum'
+import { ClassroomStatusEnum } from '@libs/statuses'
 import { getUser } from '@services/auth.service'
 import {
     classroomIsNotReservedByGroup,

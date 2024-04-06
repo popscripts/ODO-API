@@ -3,6 +3,7 @@ import { db } from '@utils/db.server'
 import { AccountTypes } from '@libs/accountTypes'
 import { faker } from '@faker-js/faker'
 import { hashPassword } from '@utils/auth.helper'
+import { GroupVisitedClassroom } from '@customTypes/classroom.type'
 
 export const getGroups = async (openDayId: number): Promise<Group[] | null> => {
     return db.group.findMany({
@@ -237,18 +238,22 @@ export const isUserMemberOfGroup = async (
 
 export const addGroupVisitedClassroom = async (
     groupId: number,
-    classroomId: number
+    classroomId: number,
+    classroom: string,
+    title: string
 ) => {
     return db.groupVisitedClassroom.create({
         data: {
             groupId,
-            classroomId
+            classroomId,
+            classroom,
+            title
         }
     })
 }
 
-export const getGroupVisitedClassrooms = async (groupId: number) => {
-    return db.groupVisitedClassroom.findMany({
+export const getGroupVisitedClassroomsIds = async (groupId: number) => {
+    let classroomsIds = await db.groupVisitedClassroom.findMany({
         where: {
             groupId
         },
@@ -256,15 +261,38 @@ export const getGroupVisitedClassrooms = async (groupId: number) => {
             classroomId: true
         }
     })
+
+    return classroomsIds
+        .map((classroomId) => {
+            return Object.values(classroomId)
+        })
+        .flat()
+}
+
+export const getGroupVisitedClassrooms = async (
+    groupId: number
+): Promise<GroupVisitedClassroom[]> => {
+    return db.groupVisitedClassroom.findMany({
+        where: {
+            groupId
+        },
+        select: {
+            groupId: true,
+            classroomId: true,
+            classroom: true,
+            title: true
+        }
+    })
 }
 
 export const deleteGroupVisitedClassroom = async (
     groupId: number,
     classroomId: number
-) => {
-    return db.groupVisitedClassroom.deleteMany({
+): Promise<void> => {
+    await db.groupVisitedClassroom.deleteMany({
         where: {
-            AND: [{ groupId }, { classroomId }]
+            groupId,
+            classroomId
         }
     })
 }

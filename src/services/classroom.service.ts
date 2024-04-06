@@ -80,6 +80,91 @@ export const listClassrooms = async (
     })
 }
 
+export const getClassroomsByStatus = async (
+    openDayId: number,
+    status: number,
+    groupVisitedClassrooms: number[]
+): Promise<Classroom[]> => {
+    return db.classroom.findMany({
+        where: {
+            openDayId,
+            id: {
+                notIn: groupVisitedClassrooms
+            },
+            statusId: status
+        },
+        select: {
+            id: true,
+            openDayId: true,
+            classroom: true,
+            title: true,
+            description: true,
+            managedBy: {
+                select: {
+                    id: true,
+                    username: true,
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    },
+                    pictureName: true,
+                    accountType: true
+                }
+            },
+            status: true,
+            reservedAt: true,
+            reservedBy: {
+                select: {
+                    id: true,
+                    GroupMembers: {
+                        select: {
+                            id: true,
+                            username: true,
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            },
+                            pictureName: true,
+                            accountType: true
+                        }
+                    },
+                    groupSize: true,
+                    description: true
+                }
+            },
+            takenBy: {
+                select: {
+                    id: true,
+                    GroupMembers: {
+                        select: {
+                            id: true,
+                            username: true,
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            },
+                            pictureName: true,
+                            accountType: true
+                        }
+                    },
+                    groupSize: true,
+                    description: true
+                }
+            },
+            takenAt: true
+        }
+    })
+}
+
 export const addClassroom = async (
     openDayId: number,
     classroom: string,

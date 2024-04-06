@@ -66,7 +66,7 @@ groupRouter.get(
 
 /**
  * POST: Add a group visited classroom
- * Params: ID (groupId), classroomId
+ * Params: ID (groupId), classroomId, classroom (name), title
  */
 groupRouter.post(
     '/visited-classrooms',

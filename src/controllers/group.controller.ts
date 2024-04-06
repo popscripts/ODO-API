@@ -7,13 +7,10 @@ import { Group, Member } from '@customTypes/group.type'
 import { Server } from 'socket.io'
 import { ShortUser } from '@customTypes/auth.type'
 import { setClassroomStatus } from '@utils/status.helper'
-import { ClassroomStatusEnum } from '@libs/classroomStatusEnum'
+import { ClassroomStatusEnum } from '@libs/statuses'
 import { emitClassroomStatus } from '@controllers/classroom.controller'
 import { ClassroomStatusEvent } from '@customTypes/classroom.type'
-import {
-    GroupActionEnum,
-    GroupVisitedClassroomActionEnum
-} from '@libs/GroupActionEnum'
+import { GroupActionEnum } from '@libs/GroupActionEnum'
 
 export const getGroups = async (
     request: Request,
@@ -120,15 +117,16 @@ export const addGroupVisitedClassroom = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const { id, classroomId } = request.body
-        await GroupService.addGroupVisitedClassroom(id, classroomId)
+        const { id, classroomId, classroom, title } = request.body
 
-        await emitGroupVisitedClassroomAction(
-            request.io,
+        await GroupService.addGroupVisitedClassroom(
             id,
             classroomId,
-            GroupVisitedClassroomActionEnum.visit
+            classroom,
+            title
         )
+
+        await emitGroupVisitedClassrooms(request.io, id)
 
         return response.status(201).json(Callbacks.addGroupVisitedClassroom)
     } catch (error: any) {
@@ -143,18 +141,12 @@ export const getGroupVisitedClassroom = async (
 ): Promise<Response> => {
     try {
         const id: number = parseInt(request.params.id)
-        const groupVisitedClassrooms =
-            await GroupService.getGroupVisitedClassrooms(id)
-
-        let parsedGroupVisitedClassrooms: number[] = groupVisitedClassrooms
-            .map((value) => {
-                return Object.values(value)
-            })
-            .flat()
+        const groupVisitedClassrooms: number[] =
+            await GroupService.getGroupVisitedClassroomsIds(id)
 
         return response
             .status(200)
-            .json({ result: parsedGroupVisitedClassrooms, error: 0 })
+            .json({ result: groupVisitedClassrooms, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
         return response.status(500).json(Error.getGroupVisitedClassroomsError)
@@ -169,12 +161,7 @@ export const deleteGroupVisitedClassroom = async (
         const { id, classroomId } = request.body
         await GroupService.deleteGroupVisitedClassroom(id, classroomId)
 
-        await emitGroupVisitedClassroomAction(
-            request.io,
-            id,
-            classroomId,
-            GroupVisitedClassroomActionEnum.delete
-        )
+        await emitGroupVisitedClassrooms(request.io, id)
 
         return response.status(200).json(Callbacks.deleteGroupVisitedClassroom)
     } catch (error: any) {
@@ -246,37 +233,31 @@ const emitGroupAction = (
     }
 }
 
-const emitGroupVisitedClassroomAction = async (
+const emitGroupVisitedClassrooms = async (
     io: Server,
-    groupId: number,
-    classroomId: number,
-    action: GroupVisitedClassroomActionEnum
+    groupId: number
 ): Promise<void> => {
     try {
         const group: Group | null = await GroupService.getGroup(groupId)
+        const visitedClassrooms =
+            await GroupService.getGroupVisitedClassrooms(groupId)
 
         if (group?.GroupMembers) {
             group.GroupMembers.map((groupMember: ShortUser) => {
                 if (groupMember.Socket?.id) {
                     io.to(groupMember.Socket?.id).emit(
-                        'groupVisitedClassroomDeleted',
-                        {
-                            classroomId,
-                            action: GroupVisitedClassroomActionEnum[action]
-                        }
+                        'groupVisitedClassroom',
+                        visitedClassrooms
                     )
                 }
             })
         }
 
-        logger.log(
-            'socket',
-            `Action ${GroupVisitedClassroomActionEnum[action]} with classroom ${classroomId} for group ${groupId} emitted`
-        )
+        logger.log('socket', `Group ${groupId} visited classrooms emitted`)
     } catch (error: any) {
         logger.log(
             'socket',
-            `emitDeletedGroupVisitedClassroom ${error.message} | error: ${1}`
+            `emitGroupVisitedClassrooms ${error.message} | error: ${1}`
         )
     }
 }

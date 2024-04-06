@@ -142,8 +142,10 @@ model Socket {
 }
 
 model GroupVisitedClassroom {
-  id          Int   @id @default(autoincrement())
-  Group       Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  id          Int    @id @default(autoincrement())
+  Group       Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId     Int
   classroomId Int
+  classroom   String
+  title       String
 }
