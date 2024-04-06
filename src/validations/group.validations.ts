@@ -1,4 +1,4 @@
-import { body, CustomValidator } from 'express-validator'
+import { body, CustomValidator, ValidationChain } from 'express-validator'
 import * as GroupService from '@services/group.service'
 
 const groupIdValidation: CustomValidator = async (id) => {
@@ -17,4 +17,8 @@ const groupIdValidation: CustomValidator = async (id) => {
     })
 }
 
-export const groupValidation = [body('id').custom(groupIdValidation)]
+export const groupValidation: ValidationChain[] = [
+    body('id').custom(groupIdValidation),
+    body('classroom').isString().withMessage('Należy podać nazwę klasy'),
+    body('title').isString().withMessage('Należy podać tytuł klasy')
+]

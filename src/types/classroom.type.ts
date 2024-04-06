@@ -48,3 +48,10 @@ export type ClassroomStatusEvent = {
     status: string
     prevStatus: string
 }
+
+export type GroupVisitedClassroom = {
+    groupId: number
+    classroomId: number
+    classroom: string
+    title: string
+}

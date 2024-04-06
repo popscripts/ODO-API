@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 import express, { Express } from 'express'
 import cors from 'cors'
 import { routerConfig } from '@config/router'
-import { dbHealthCheck } from '@utils/db.healthcheck'
+import { healthcheck } from '@utils/healthcheck'
 import cookieParser from 'cookie-parser'
 import { cronConfig } from '@config/cron'
 import { logger, morganMiddleware } from '@config/logger'
@@ -32,7 +32,7 @@ declare global {
     }
 }
 
-dbHealthCheck().then(() => {
+healthcheck().then(() => {
     const app: Express = express()
 
     const io: Server = createSocketServer()

@@ -283,10 +283,15 @@ export const updatePersonalData = async (id: number, name: string) => {
     })
 }
 
-export const deleteTempUser = async (id: number) => {
-    return db.user.delete({
+export const getUserGroupId = async (id: number): Promise<number | null> => {
+    const result = await db.user.findUnique({
         where: {
             id
+        },
+        select: {
+            groupId: true
         }
     })
+
+    return result ? result.groupId : null
 }

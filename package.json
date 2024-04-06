@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^8.2.0",
-    "@prisma/client": "^5.11.0",
+    "@prisma/client": "^5.12.1",
     "@types/bcrypt": "^5.0.1",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.15",
