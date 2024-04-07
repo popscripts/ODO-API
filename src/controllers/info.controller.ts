@@ -24,7 +24,7 @@ export const addInfo = async (request: Request, response: Response) => {
         const content: string = request.body.content
 
         const newInfo: Info = await InfoService.addInfo(
-            request.user.id,
+            request.user.openDayId,
             content
         )
 

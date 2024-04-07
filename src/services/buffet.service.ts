@@ -165,6 +165,14 @@ export const placeOrder = async (
             OrderPosition: {
                 create: order.orderPositions
             }
+        },
+        select: {
+            id: true,
+            orderedBy: {
+                include: {
+                    Socket: true
+                }
+            }
         }
     })
 }

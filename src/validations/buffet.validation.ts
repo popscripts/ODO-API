@@ -53,7 +53,7 @@ export const newOrderValidation: ValidationChain[] = [
 
 export const orderStatusChangeValidation: ValidationChain[] = [
     body('id').isNumeric().withMessage('ID zamówienia nie zostało podane'),
-    body('status')
-        .isString()
+    body('statusId')
+        .isNumeric()
         .withMessage('Status zamówienia nie został przekazany')
 ]

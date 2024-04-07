@@ -12,6 +12,7 @@ import { Key } from '@customTypes/key.type'
 import { upload } from '@utils/file.helper'
 import { Server } from 'socket.io'
 import fs from 'fs'
+import { disconnectUserSocket } from '@services/socket.service'
 
 export const register = async (
     request: Request,
@@ -91,6 +92,8 @@ export const logout = async (
     try {
         response.clearCookie('JWT')
         response.clearCookie('refreshToken')
+
+        await disconnectUserSocket(request.user.id)
 
         return response.status(200).json(Callback.logout)
     } catch (error: any) {
