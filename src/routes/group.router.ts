@@ -97,8 +97,9 @@ groupRouter.get('/members-list', authorize, GroupController.getMemberList)
  * Params: id (groupId)
  */
 groupRouter.put(
-    '/leave/:id',
+    '/leave',
     authorize,
+    validate(groupValidation),
     isUserMemberOfGroupVerification,
     checkNumberOfMembers,
     GroupController.leaveGroup

@@ -10,7 +10,6 @@ import { setClassroomStatus } from '@utils/status.helper'
 import { ClassroomStatusEnum } from '@libs/statuses'
 import { emitClassroomStatus } from '@controllers/classroom.controller'
 import { ClassroomStatusEvent } from '@customTypes/classroom.type'
-import { GroupActionEnum } from '@libs/GroupActionEnum'
 
 export const getGroups = async (
     request: Request,
@@ -62,7 +61,7 @@ export const addGroup = async (
             groupMembers
         )
 
-        await emitGroup(request.io, id)
+        emitGroup(request.io, id)
 
         return response.status(201).json(Callbacks.newGroup)
     } catch (error: any) {
@@ -85,7 +84,7 @@ export const updateGroup = async (
             groupMembers
         )
 
-        await emitGroup(request.io, id)
+        emitGroup(request.io, id)
 
         return response.status(201).json(Callbacks.updateGroup)
     } catch (error: any) {
@@ -103,7 +102,7 @@ export const deleteGroup = async (
 
         await handleDeletedGroupClassroom(id, request.user.id, request.io)
         await GroupService.deleteGroup(id)
-        emitGroupAction(request.io, id, GroupActionEnum.delete)
+        emitGroup(request.io, request.body.id)
 
         return response.status(200).json(Callbacks.deleteGroup)
     } catch (error: any) {
@@ -188,9 +187,8 @@ export const leaveGroup = async (
     response: Response
 ): Promise<Response> => {
     try {
-        const groupId: number = parseInt(request.params.id)
         await GroupService.leaveGroup(request.user.id)
-        emitGroupAction(request.io, groupId, GroupActionEnum.leave)
+        emitGroup(request.io, request.body.id)
 
         return response.status(201).json(Callbacks.leaveGroup)
     } catch (error: any) {
@@ -199,37 +197,13 @@ export const leaveGroup = async (
     }
 }
 
-const emitGroup = async (io: Server, groupId: number): Promise<void> => {
+const emitGroup = (io: Server, groupId: number): void => {
     try {
-        const group: Group | null = await GroupService.getGroup(groupId)
+        io.emit('groupUpdate', true)
 
-        io.emit('groupUpdate', {
-            group
-        })
-
-        logger.log('socket', `Group ${groupId} data emitted`)
+        logger.log('socket', `Group ${groupId} updated`)
     } catch (error: any) {
         logger.log('socket', `emitGroup ${error.message} | error: ${1}`)
-    }
-}
-
-const emitGroupAction = (
-    io: Server,
-    groupId: number,
-    action: GroupActionEnum
-): void => {
-    try {
-        io.emit('groupAction', {
-            id: groupId,
-            action: GroupActionEnum[action]
-        })
-
-        logger.log(
-            'socket',
-            `Action ${GroupActionEnum[action]} for group ${groupId} emitted`
-        )
-    } catch (error: any) {
-        logger.log('socket', `emitDeletedGroup ${error.message} | error: ${1}`)
     }
 }
 
