@@ -12,27 +12,36 @@ export const setClassroomStatus = async (
 
     switch (status) {
         case ClassroomStatusEnum.free:
-            if (isClassroomBusyAndNotReserved(classroom)) {
+            if (
+                isClassroomJustBusy(classroom) ||
+                isClassroomJustReserved(classroom)
+            ) {
                 await ClassroomService.setFreeStatus(classroom.id)
                 break
             }
 
-            if (isClassroomReserved(classroom)) {
+            if (
+                isClassroomTakenByMyGroupAndReservedByOtherGroup(
+                    classroom,
+                    group
+                )
+            ) {
                 await ClassroomService.setFreeWhenReserved(classroom.id)
                 break
             }
 
-            if (isClassroomBusyAndReservedByTheGroup(classroom, group)) {
+            if (
+                isClassroomTakenByOtherGroupAndReservedByMyGroup(
+                    classroom,
+                    group
+                )
+            ) {
                 await ClassroomService.cancelReservation(classroom.id)
                 break
             }
 
-            if (isClassroomNotReservedAndNotBusy(classroom)) {
-                await ClassroomService.setFreeStatus(classroom.id)
-                break
-            }
-
             break
+
         case ClassroomStatusEnum.busy:
             if (isClassroomReserved(classroom)) {
                 await ClassroomService.setBusyClassroomWhenReserved(
@@ -72,37 +81,38 @@ export const setClassroomStatus = async (
     }
 }
 
-const isClassroomBusyAndNotReserved = (
-    classroom: ShortClassroom | null
-): boolean => {
-    return (
-        classroom?.status.id === ClassroomStatusEnum.busy &&
-        classroom?.reservedAt === null
-    )
-}
-const isClassroomBusyAndReservedByTheGroup = (
-    classroom: ShortClassroom | null,
-    group: Group
-): boolean => {
-    return (
-        classroom?.status.id === ClassroomStatusEnum.busy &&
-        classroom?.id === group.Reserved?.id
-    )
-}
-
-const isClassroomNotReservedAndNotBusy = (
-    classroom: ShortClassroom | null
-): boolean => {
-    return (
-        classroom?.reservedAt !== null &&
-        classroom?.status.id !== ClassroomStatusEnum.busy
-    )
-}
-
 const isClassroomReserved = (classroom: ShortClassroom | null): boolean => {
     return classroom?.reservedAt !== null
 }
 
 const isClassroomBusy = (classroom: ShortClassroom | null): boolean => {
     return classroom?.takenAt !== null
+}
+
+const isClassroomJustBusy = (classroom: ShortClassroom | null) => {
+    return (
+        classroom?.status.id === ClassroomStatusEnum.busy &&
+        classroom.reservedAt === null
+    )
+}
+
+const isClassroomJustReserved = (classroom: ShortClassroom | null) => {
+    return (
+        classroom?.status.id === ClassroomStatusEnum.reserved &&
+        classroom.takenAt === null
+    )
+}
+
+const isClassroomTakenByOtherGroupAndReservedByMyGroup = (
+    classroom: ShortClassroom,
+    group: Group
+): boolean => {
+    return classroom.takenAt !== null && classroom.id === group.Reserved?.id
+}
+
+const isClassroomTakenByMyGroupAndReservedByOtherGroup = (
+    classroom: ShortClassroom,
+    group: Group
+): boolean => {
+    return classroom.reservedAt !== null && classroom.id === group.Taken?.id
 }

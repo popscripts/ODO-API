@@ -66,7 +66,7 @@ export const restoreUser: JsonResponse = {
 }
 
 export const newOrder: JsonResponse = {
-    result: 'Pomyślnie złożono zamówienia',
+    result: 'Pomyślnie złożono zamówienie',
     error: 0
 }
 

@@ -2,12 +2,16 @@ import { Request, Response } from 'express'
 import * as BuffetService from '@services/buffet.service'
 import * as Error from '@libs/errors'
 import * as Callback from '@libs/callbacks'
-import { statuses } from '@libs/statuses'
+import { OrderStatusRecord } from '@libs/statuses'
 import { logger } from '@config/logger'
-import { NewOrder, Order } from '@customTypes/buffet.type'
-import { Dishes } from '@libs/dishes'
+import { Order, UserOrder } from '@customTypes/buffet.type'
+import { Server } from 'socket.io'
+import { UserSocket } from '@customTypes/socket.type'
 
-export const orders = async (request: Request, response: Response) => {
+export const orders = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
         const orders: Order[] = await BuffetService.getOrders(
             request.user.openDayId
@@ -20,9 +24,12 @@ export const orders = async (request: Request, response: Response) => {
     }
 }
 
-export const userOrders = async (request: Request, response: Response) => {
+export const userOrders = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
-        const usersOrders: Order[] = await BuffetService.getUserOrders(
+        const usersOrders: UserOrder[] = await BuffetService.getUserOrders(
             request.user.id
         )
 
@@ -33,14 +40,14 @@ export const userOrders = async (request: Request, response: Response) => {
     }
 }
 
-export const ordersByStatus = async (request: Request, response: Response) => {
+export const ordersByStatus = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
-        const status: string = request.params.status
-        const statusId: number = statuses[status]
-
         const orders: Order[] = await BuffetService.getOrdersByStatus(
             request.user.openDayId,
-            statusId
+            OrderStatusRecord[request.params.status]
         )
 
         return response.status(200).json({ result: orders, error: 0 })
@@ -50,16 +57,16 @@ export const ordersByStatus = async (request: Request, response: Response) => {
     }
 }
 
-export const placeOrder = async (request: Request, response: Response) => {
+export const placeOrder = async (
+    request: Request,
+    response: Response
+): Promise<Response> => {
     try {
-        const { dish, amount, comment }: NewOrder = request.body
-
         await BuffetService.placeOrder(
+            request.body.order,
+            request.body.order.comment,
             request.user.openDayId,
-            request.user.id,
-            Dishes[dish],
-            amount,
-            comment
+            request.user.id
         )
 
         return response.status(201).json(Callback.newOrder)
@@ -72,11 +79,15 @@ export const placeOrder = async (request: Request, response: Response) => {
 export const changeOrderStatus = async (
     request: Request,
     response: Response
-) => {
+): Promise<Response> => {
     try {
-        const { id, status } = request.body
-        const statusId = statuses[status]
-        await BuffetService.changeOrderStatus(id, statusId)
+        const { id, orderedBy } = await BuffetService.changeOrderStatus(
+            request.body.id,
+            request.body.statusId
+        )
+
+        emitOrderStatusEvent(request.io, orderedBy.Socket, id)
+
         return response.status(200).json(Callback.changeStatus)
     } catch (error: any) {
         logger.error(`500 | ${error}`)
@@ -87,16 +98,38 @@ export const changeOrderStatus = async (
 export const userOrdersByStatus = async (
     request: Request,
     response: Response
-) => {
+): Promise<Response> => {
     try {
-        const usersOrders = await BuffetService.getUserOrdersByStatus(
-            request.user.openDayId,
-            statuses[request.params.status],
-            request.user.id
-        )
+        const usersOrders: UserOrder[] =
+            await BuffetService.getUserOrdersByStatus(
+                request.user.openDayId,
+                OrderStatusRecord[request.params.status],
+                request.user.id
+            )
 
         return response.status(200).json({ result: usersOrders, error: 0 })
     } catch (error: any) {
         return response.status(500).json(Error.responseError)
+    }
+}
+
+const emitOrderStatusEvent = (
+    io: Server,
+    orderSocket: UserSocket | null,
+    orderId: number
+): void => {
+    try {
+        io.to('cook').emit('orderStatusUpdate', true)
+
+        if (orderSocket?.connected) {
+            io.to(orderSocket.id).emit('orderStatusUpdate', true)
+        }
+
+        logger.log('socket', `Order ${orderId} status emitted`)
+    } catch (error: any) {
+        logger.log(
+            'socket',
+            `emitOrderStatusEvent ${error.message} | error: ${1}`
+        )
     }
 }
