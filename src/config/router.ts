@@ -1,4 +1,4 @@
-import { Express } from 'express'
+import express, { Express } from 'express'
 import { authRouter } from '@routes/auth.router'
 import { classroomRouter } from '@routes/classroom.router'
 import { keyRouter } from '@routes/key.router'
@@ -15,4 +15,5 @@ export const routerConfig = (app: Express): void => {
     app.use('/api/info', infoRouter)
     app.use('/api/group', groupRouter)
     app.use('/api/dynamic-content', dynamicContentRouter)
+    app.use('/', express.static('public'))
 }

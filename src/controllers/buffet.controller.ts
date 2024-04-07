@@ -62,12 +62,14 @@ export const placeOrder = async (
     response: Response
 ): Promise<Response> => {
     try {
-        await BuffetService.placeOrder(
+        const { id, orderedBy } = await BuffetService.placeOrder(
             request.body.order,
             request.body.order.comment,
             request.user.openDayId,
             request.user.id
         )
+
+        emitOrderUpdateEvent(request.io, orderedBy.Socket, id)
 
         return response.status(201).json(Callback.newOrder)
     } catch (error: any) {
@@ -86,7 +88,7 @@ export const changeOrderStatus = async (
             request.body.statusId
         )
 
-        emitOrderStatusEvent(request.io, orderedBy.Socket, id)
+        emitOrderUpdateEvent(request.io, orderedBy.Socket, id)
 
         return response.status(200).json(Callback.changeStatus)
     } catch (error: any) {
@@ -113,23 +115,23 @@ export const userOrdersByStatus = async (
     }
 }
 
-const emitOrderStatusEvent = (
+const emitOrderUpdateEvent = (
     io: Server,
     orderSocket: UserSocket | null,
     orderId: number
 ): void => {
     try {
-        io.to('cook').emit('orderStatusUpdate', true)
+        io.to('cook').emit('orderUpdate', true)
 
         if (orderSocket?.connected) {
-            io.to(orderSocket.id).emit('orderStatusUpdate', true)
+            io.to(orderSocket.id).emit('orderUpdate', true)
         }
 
-        logger.log('socket', `Order ${orderId} status emitted`)
+        logger.log('socket', `Order ${orderId} emitted`)
     } catch (error: any) {
         logger.log(
             'socket',
-            `emitOrderStatusEvent ${error.message} | error: ${1}`
+            `emitOrderUpdateEvent ${error.message} | error: ${1}`
         )
     }
 }

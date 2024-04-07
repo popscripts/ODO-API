@@ -34,7 +34,7 @@ authRouter.post('/login', validate(loginValidation), AuthController.login)
 /**
  * GET: Logout
  */
-authRouter.get('/logout', AuthController.logout)
+authRouter.get('/logout', authorize, AuthController.logout)
 
 /**
  * GET: User data

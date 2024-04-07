@@ -125,3 +125,15 @@ export const isSocketRegistered = async (id: string): Promise<boolean> => {
 
     return !!isRegistered
 }
+
+export const disconnectUserSocket = async (userId: number) => {
+    return db.socket.update({
+        where: {
+            userId: userId
+        },
+        data: {
+            id: faker.string.hexadecimal({ length: 8 }),
+            connected: false
+        }
+    })
+}

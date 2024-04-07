@@ -212,7 +212,7 @@ export const changeClassroomStatus = async (
         )
 
         if (
-            prevStatus === ClassroomStatusEnum[ClassroomStatusEnum.busy] &&
+            request.body.group?.Taken?.id === id &&
             status === ClassroomStatusEnum[ClassroomStatusEnum.free]
         ) {
             await addGroupVisitedClassroom(
