@@ -7,7 +7,10 @@ import { Express, NextFunction, Request, Response } from 'express'
 export const createSocketServer = (): Server => {
     return new Server({
         cors: {
-            origin: process.env.EXPO_URI
+            credentials: true,
+            origin: (_, callback) => {
+                callback(null, true)
+            }
         }
     })
 }

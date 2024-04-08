@@ -7,7 +7,7 @@ export const checkNumberOfMembers = async (
     response: Response,
     next: NextFunction
 ): Promise<Response | undefined> => {
-    const id: number = parseInt(request.params.id)
+    const id: number = parseInt(request.body.id)
     const numberOfMembers: number = await getNumberOfMembers(id)
 
     if (numberOfMembers === 1) {
