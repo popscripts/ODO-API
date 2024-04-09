@@ -8,6 +8,7 @@ import {
 import { validate } from '@middlewares/validation'
 import { groupValidation } from '@validations/group.validations'
 import { groupVisitedClassroomVerification } from '@middlewares/groupVisitedClassroomVerification'
+import { checkNumberOfMembers } from '@middlewares/checkNumberOfMembers'
 
 export const groupRouter: Router = express.Router()
 
@@ -64,8 +65,8 @@ groupRouter.get(
 )
 
 /**
- * POST: Add group visited classroom
- * Params: ID (groupId), classroomId
+ * POST: Add a group visited classroom
+ * Params: ID (groupId), classroomId, classroom (name), title
  */
 groupRouter.post(
     '/visited-classrooms',
@@ -76,7 +77,7 @@ groupRouter.post(
 )
 
 /**
- * POST: Delete group visited classroom
+ * POST: Delete a group visited classroom
  * Params: ID (groupId), classroomId
  */
 groupRouter.delete(
@@ -87,11 +88,24 @@ groupRouter.delete(
 )
 
 /**
- * GET: Get list of users for add group member select
+ * GET: Get a list of users for add group member select
  */
-groupRouter.get('/members-list', authorize, GroupController.getMembersList)
+groupRouter.get('/members-list', authorize, GroupController.getMemberList)
 
 /**
- * GET: Get group by ID
+ * PUT: Leave the group during a tour
+ * Params: id (groupId)
+ */
+groupRouter.put(
+    '/leave',
+    authorize,
+    validate(groupValidation),
+    isUserMemberOfGroupVerification,
+    checkNumberOfMembers,
+    GroupController.leaveGroup
+)
+
+/**
+ * GET: Get a group by ID
  */
 groupRouter.get('/:id', authorize, GroupController.getGroup)

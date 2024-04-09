@@ -7,10 +7,12 @@ import * as DynamicContentService from '@services/dynamicContent.service'
 export const getDynamicMembers = async (
     request: Request,
     response: Response
-) => {
+): Promise<Response> => {
     try {
+        let value: string = request.query.value?.toString() ?? ''
+
         const dynamicMemberList: Member[] =
-            await DynamicContentService.getDynamicContent(request.params.value)
+            await DynamicContentService.getDynamicContent(value)
 
         return response
             .status(200)

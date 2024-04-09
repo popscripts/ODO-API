@@ -1,12 +1,14 @@
 import { db } from '@utils/db.server'
 import { Classroom } from '@customTypes/classroom.type'
+import { ClassroomStatusEnum } from '@libs/statuses'
 
 export const listClassrooms = async (
     openDayId: number
 ): Promise<Classroom[]> => {
     return db.classroom.findMany({
         where: {
-            openDayId
+            openDayId,
+            deleted: false
         },
         select: {
             id: true,
@@ -25,7 +27,8 @@ export const listClassrooms = async (
                             connected: true
                         }
                     },
-                    pictureName: true
+                    pictureName: true,
+                    accountType: true
                 }
             },
             status: true,
@@ -44,7 +47,8 @@ export const listClassrooms = async (
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -65,7 +69,94 @@ export const listClassrooms = async (
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
+                        }
+                    },
+                    groupSize: true,
+                    description: true
+                }
+            },
+            takenAt: true
+        }
+    })
+}
+
+export const getClassroomsByStatus = async (
+    openDayId: number,
+    status: number,
+    groupVisitedClassrooms: number[]
+): Promise<Classroom[]> => {
+    return db.classroom.findMany({
+        where: {
+            openDayId,
+            id: {
+                notIn: groupVisitedClassrooms
+            },
+            statusId: status,
+            deleted: false
+        },
+        select: {
+            id: true,
+            openDayId: true,
+            classroom: true,
+            title: true,
+            description: true,
+            managedBy: {
+                select: {
+                    id: true,
+                    username: true,
+                    name: true,
+                    Socket: {
+                        select: {
+                            id: true,
+                            connected: true
+                        }
+                    },
+                    pictureName: true,
+                    accountType: true
+                }
+            },
+            status: true,
+            reservedAt: true,
+            reservedBy: {
+                select: {
+                    id: true,
+                    GroupMembers: {
+                        select: {
+                            id: true,
+                            username: true,
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            },
+                            pictureName: true,
+                            accountType: true
+                        }
+                    },
+                    groupSize: true,
+                    description: true
+                }
+            },
+            takenBy: {
+                select: {
+                    id: true,
+                    GroupMembers: {
+                        select: {
+                            id: true,
+                            username: true,
+                            name: true,
+                            Socket: {
+                                select: {
+                                    id: true,
+                                    connected: true
+                                }
+                            },
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -167,7 +258,8 @@ export const listClassroomsByStatus = async (
             openDayId,
             status: {
                 name: status
-            }
+            },
+            deleted: false
         },
         select: {
             id: true,
@@ -186,7 +278,8 @@ export const listClassroomsByStatus = async (
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    accountType: true
                 }
             },
             status: true,
@@ -205,7 +298,8 @@ export const listClassroomsByStatus = async (
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -226,7 +320,8 @@ export const listClassroomsByStatus = async (
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -241,7 +336,8 @@ export const listClassroomsByStatus = async (
 export const getClassroom = async (id: number): Promise<Classroom | null> => {
     return db.classroom.findUnique({
         where: {
-            id
+            id,
+            deleted: false
         },
         select: {
             id: true,
@@ -260,7 +356,8 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                             id: true,
                             connected: true
                         }
-                    }
+                    },
+                    accountType: true
                 }
             },
             status: true,
@@ -279,7 +376,8 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -300,7 +398,8 @@ export const getClassroom = async (id: number): Promise<Classroom | null> => {
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     groupSize: true,
@@ -318,7 +417,7 @@ export const setFreeStatus = async (id: number) => {
             id
         },
         data: {
-            statusId: 1,
+            statusId: ClassroomStatusEnum.free,
             takenById: null,
             takenAt: null,
             reservedById: null,
@@ -349,7 +448,7 @@ export const setBusyStatus = async (
             id
         },
         data: {
-            statusId: 2,
+            statusId: ClassroomStatusEnum.busy,
             takenById,
             takenAt
         }
@@ -366,7 +465,7 @@ export const setReservedStatus = async (
             id
         },
         data: {
-            statusId: 3,
+            statusId: ClassroomStatusEnum.reserved,
             reservedById,
             reservedAt
         }
@@ -399,7 +498,7 @@ export const setBusyClassroomWhenReserved = async (
             id
         },
         data: {
-            statusId: 2,
+            statusId: ClassroomStatusEnum.busy,
             reservedById: null,
             reservedAt: null,
             takenById,
@@ -414,7 +513,7 @@ export const setFreeWhenReserved = async (id: number) => {
             id
         },
         data: {
-            statusId: 3,
+            statusId: ClassroomStatusEnum.reserved,
             takenById: null,
             takenAt: null
         }

@@ -66,7 +66,7 @@ export const restoreUser: JsonResponse = {
 }
 
 export const newOrder: JsonResponse = {
-    result: 'Pomyślnie złożono zamówienia',
+    result: 'Pomyślnie złożono zamówienie',
     error: 0
 }
 
@@ -127,5 +127,10 @@ export const addGroupVisitedClassroom: JsonResponse = {
 
 export const deleteGroupVisitedClassroom: JsonResponse = {
     result: 'Pomyślnie usunięto klasę z odwiedzonych',
+    error: 0
+}
+
+export const leaveGroup: JsonResponse = {
+    result: 'Pomyślnie opuszczono grupę',
     error: 0
 }

@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 import express, { Express } from 'express'
 import cors from 'cors'
 import { routerConfig } from '@config/router'
-import { dbHealthCheck } from '@utils/db.healthcheck'
+import { healthcheck } from '@utils/healthcheck'
 import cookieParser from 'cookie-parser'
 import { cronConfig } from '@config/cron'
 import { logger, morganMiddleware } from '@config/logger'
@@ -10,7 +10,6 @@ import fileUpload from 'express-fileupload'
 import { Server as httpServer, createServer } from 'http'
 import { Server } from 'socket.io'
 import { ioConnectionConfig, createSocketServer } from '@config/socket'
-import { disconnectAllSocketHandler } from '@utils/socket.handler'
 import { Token } from '@customTypes/auth.type'
 
 dotenv.config()
@@ -33,14 +32,21 @@ declare global {
     }
 }
 
-dbHealthCheck().then(() => {
+healthcheck().then(() => {
     const app: Express = express()
 
     const io: Server = createSocketServer()
 
     ioConnectionConfig(app, io)
 
-    app.use(cors())
+    app.use(
+        cors({
+            credentials: true,
+            origin: (_, callback) => {
+                callback(null, true)
+            }
+        })
+    )
     app.use(
         fileUpload({
             createParentPath: true,
@@ -59,10 +65,6 @@ dbHealthCheck().then(() => {
     const server: httpServer = createServer(app)
 
     io.attach(server)
-
-    disconnectAllSocketHandler(io).then(() =>
-        logger.info('Disconnected all Sockets')
-    )
 
     server.listen(PORT, (): void => {
         logger.info(`Server started on :${PORT}`)

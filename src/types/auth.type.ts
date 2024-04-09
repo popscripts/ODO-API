@@ -35,6 +35,7 @@ export type ShortUser = {
     name: string | null
     Socket: UserSocket | null
     pictureName: string | null
+    accountType: AccountType
 }
 
 export type AccountType = {

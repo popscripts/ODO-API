@@ -11,6 +11,8 @@ import { logger } from '@config/logger'
 import { Key } from '@customTypes/key.type'
 import { upload } from '@utils/file.helper'
 import { Server } from 'socket.io'
+import fs from 'fs'
+import { disconnectUserSocket } from '@services/socket.service'
 
 export const register = async (
     request: Request,
@@ -67,13 +69,15 @@ export const login = async (
         const refreshToken: string = AuthHelper.generateRefreshToken(userData)
 
         response.cookie('JWT', accessToken, {
-            httpOnly: true,
-            sameSite: 'none'
+            httpOnly: false,
+            sameSite: 'lax',
+            expires: new Date(Date.now() + 60 * 60 * 1000)
         })
 
         response.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            sameSite: 'none'
+            httpOnly: false,
+            sameSite: 'lax',
+            expires: new Date(Date.now() + 60 * 120 * 1000)
         })
 
         return response.status(200).json(Callback.login)
@@ -90,6 +94,8 @@ export const logout = async (
     try {
         response.clearCookie('JWT')
         response.clearCookie('refreshToken')
+
+        await disconnectUserSocket(request.user.id)
 
         return response.status(200).json(Callback.logout)
     } catch (error: any) {
@@ -133,8 +139,7 @@ export const editUser = async (
 ): Promise<Response> => {
     try {
         const { id, username, accountType, shouldLogout } = request.body
-        const parsedAccountType = AccountTypes[accountType]
-        await AuthService.editUser(id, username, parsedAccountType)
+        await AuthService.editUser(id, username, AccountTypes[accountType])
 
         if (shouldLogout) {
             await callLogout(request.io, id)
@@ -213,10 +218,13 @@ export const getPicture = async (
     response: Response
 ): Promise<void | Response> => {
     try {
-        const pictureId: string = request.params.id
-        return response
-            .status(200)
-            .sendFile('/uploads/' + pictureId, { root: '.' })
+        const picturePath: string = './uploads/' + request.params.id + '.png'
+
+        if (!fs.existsSync(picturePath)) {
+            return response.status(404).json(Error.fileNotExistError)
+        }
+
+        return response.status(200).sendFile(picturePath, { root: '.' })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
         return response.status(500).json(Error.loadProfilePictureError)

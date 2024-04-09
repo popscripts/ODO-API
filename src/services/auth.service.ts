@@ -32,12 +32,7 @@ export const login = async (
             openDayId: true,
             username: true,
             password: true,
-            accountType: {
-                select: {
-                    id: true,
-                    name: true
-                }
-            }
+            accountType: true
         }
     })
 }
@@ -70,12 +65,7 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
             openDayId: true,
             username: true,
             name: true,
-            accountType: {
-                select: {
-                    id: true,
-                    name: true
-                }
-            },
+            accountType: true,
             pictureName: true,
             ManagedClassroom: {
                 select: {
@@ -101,7 +91,8 @@ export const getUser = async (id: number): Promise<AuthType.User | null> => {
                                     connected: true
                                 }
                             },
-                            pictureName: true
+                            pictureName: true,
+                            accountType: true
                         }
                     },
                     description: true,
@@ -290,4 +281,17 @@ export const updatePersonalData = async (id: number, name: string) => {
             name
         }
     })
+}
+
+export const getUserGroupId = async (id: number): Promise<number | null> => {
+    const result = await db.user.findUnique({
+        where: {
+            id
+        },
+        select: {
+            groupId: true
+        }
+    })
+
+    return result ? result.groupId : null
 }

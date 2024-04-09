@@ -1,5 +1,7 @@
 import { db } from '@utils/db.server'
 import * as BuffetType from '@customTypes/buffet.type'
+import { NewOrder } from '@customTypes/buffet.type'
+import { OrderStatusEnum } from '@libs/statuses'
 
 export const getOrders = async (
     openDayId: number
@@ -11,8 +13,11 @@ export const getOrders = async (
         select: {
             id: true,
             openDayId: true,
-            dish: true,
-            amount: true,
+            OrderPosition: {
+                include: {
+                    dish: true
+                }
+            },
             comment: true,
             status: true,
             orderedBy: {
@@ -26,7 +31,8 @@ export const getOrders = async (
                             connected: true
                         }
                     },
-                    pictureName: true
+                    pictureName: true,
+                    accountType: true
                 }
             },
             createdAt: true,
@@ -40,7 +46,7 @@ export const getOrders = async (
 
 export const getUserOrders = async (
     orderedById: number
-): Promise<BuffetType.Order[]> => {
+): Promise<BuffetType.UserOrder[]> => {
     return db.order.findMany({
         where: {
             orderedById
@@ -48,24 +54,13 @@ export const getUserOrders = async (
         select: {
             id: true,
             openDayId: true,
-            dish: true,
-            amount: true,
-            comment: true,
-            status: true,
-            orderedBy: {
-                select: {
-                    id: true,
-                    username: true,
-                    name: true,
-                    Socket: {
-                        select: {
-                            id: true,
-                            connected: true
-                        }
-                    },
-                    pictureName: true
+            OrderPosition: {
+                include: {
+                    dish: true
                 }
             },
+            comment: true,
+            status: true,
             createdAt: true,
             updatedAt: true
         },
@@ -87,8 +82,11 @@ export const getOrdersByStatus = async (
         select: {
             id: true,
             openDayId: true,
-            dish: true,
-            amount: true,
+            OrderPosition: {
+                include: {
+                    dish: true
+                }
+            },
             comment: true,
             status: true,
             orderedBy: {
@@ -102,7 +100,8 @@ export const getOrdersByStatus = async (
                             connected: true
                         }
                     },
-                    pictureName: true
+                    pictureName: true,
+                    accountType: true
                 }
             },
             createdAt: true,
@@ -124,8 +123,11 @@ export const getOrder = async (
         select: {
             id: true,
             openDayId: true,
-            dish: true,
-            amount: true,
+            OrderPosition: {
+                include: {
+                    dish: true
+                }
+            },
             comment: true,
             status: true,
             orderedBy: {
@@ -139,7 +141,8 @@ export const getOrder = async (
                             connected: true
                         }
                     },
-                    pictureName: true
+                    pictureName: true,
+                    accountType: true
                 }
             },
             createdAt: true,
@@ -149,19 +152,27 @@ export const getOrder = async (
 }
 
 export const placeOrder = async (
+    order: NewOrder,
+    comment: string | null,
     openDayId: number,
-    orderedById: number,
-    dishId: number,
-    amount: number,
-    comment: string | null
+    orderedById: number
 ) => {
     return db.order.create({
         data: {
             openDayId,
-            dishId,
-            amount,
             orderedById,
-            comment
+            comment,
+            OrderPosition: {
+                create: order.orderPositions
+            }
+        },
+        select: {
+            id: true,
+            orderedBy: {
+                include: {
+                    Socket: true
+                }
+            }
         }
     })
 }
@@ -172,7 +183,13 @@ export const checkAmountOfActiveUserOrders = async (
     return db.order.count({
         where: {
             orderedById,
-            statusId: 4
+            statusId: {
+                notIn: [
+                    OrderStatusEnum.done,
+                    OrderStatusEnum.pickedUp,
+                    OrderStatusEnum.cancelled
+                ]
+            }
         }
     })
 }
@@ -184,6 +201,14 @@ export const changeOrderStatus = async (id: number, statusId: number) => {
         },
         data: {
             statusId
+        },
+        select: {
+            id: true,
+            orderedBy: {
+                select: {
+                    Socket: true
+                }
+            }
         }
     })
 }
@@ -192,7 +217,7 @@ export const getUserOrdersByStatus = async (
     openDayId: number,
     statusId: number,
     orderedById: number
-): Promise<BuffetType.Order[]> => {
+): Promise<BuffetType.UserOrder[]> => {
     return db.order.findMany({
         where: {
             openDayId,
@@ -202,24 +227,13 @@ export const getUserOrdersByStatus = async (
         select: {
             id: true,
             openDayId: true,
-            dish: true,
-            amount: true,
-            comment: true,
-            status: true,
-            orderedBy: {
-                select: {
-                    id: true,
-                    username: true,
-                    name: true,
-                    Socket: {
-                        select: {
-                            id: true,
-                            connected: true
-                        }
-                    },
-                    pictureName: true
+            OrderPosition: {
+                include: {
+                    dish: true
                 }
             },
+            comment: true,
+            status: true,
             createdAt: true,
             updatedAt: true
         },

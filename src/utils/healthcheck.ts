@@ -1,16 +1,16 @@
 import { db } from './db.server'
 import { logger } from '@config/logger'
+import process from 'process'
 
-export const dbHealthCheck = async (): Promise<void> => {
-    const status: boolean = await dbStatus()
-    if (!status) {
+export const healthcheck = async (): Promise<void> => {
+    if (!(await dbConnected())) {
         logger.error('Database connection error')
         process.exit(1)
     } else {
         logger.info('Database connected!')
     }
 }
-const dbStatus = async (): Promise<boolean> => {
+const dbConnected = async (): Promise<boolean> => {
     try {
         await db.$queryRaw`SELECT 1`
         return true

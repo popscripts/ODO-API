@@ -3,33 +3,43 @@ import { Classroom, ShortClassroom } from '@customTypes/classroom.type'
 import { getClassroom } from '@services/classroom.service'
 import { User } from '@customTypes/auth.type'
 import { Group } from '@customTypes/group.type'
-import { ClassroomStatusEnum } from '@libs/classroomStatusEnum'
+import { ClassroomStatusEnum } from '@libs/statuses'
 import { getUser } from '@services/auth.service'
 import {
-    classroomIsNotReservedByGroup,
+    classroomIsNeitherTakenOrReservedByGroup,
     classroomStatusVerificationType,
     notVerifiedStatusResponse,
     userIsNotAMemberOfAnyGroupResponse,
     verifiedStatusResponse
 } from '@libs/classroomStatusVerificationResponses'
+import { classroomNotFoundError } from '@libs/errors'
 
 export const classroomStatusVerification = async (
     request: Request,
     response: Response,
     next: NextFunction
 ): Promise<void> => {
-    const classroomId = request.body.id
     const status = request.body.status
+    const classroom: Classroom | null = await getClassroom(request.body.id)
+    const user: User | null = await getUser(request.user.id)
+
+    if (!classroom) {
+        response.status(404).json(classroomNotFoundError)
+        return
+    }
 
     const classroomStatusVerification: classroomStatusVerificationType =
         await isClassroomStatusVerified(
-            classroomId,
+            classroom,
+            user!,
             status,
             request.user.id,
             request.user.accountType.name
         )
 
     if (classroomStatusVerification.verified) {
+        request.body.classroom = classroom as Classroom
+        request.body.group = user?.Group as Group
         next()
     } else {
         response.status(406).json({
@@ -40,13 +50,12 @@ export const classroomStatusVerification = async (
 }
 
 const isClassroomStatusVerified = async (
-    classroomId: number,
+    classroom: Classroom,
+    user: User,
     status: string,
     userId: number,
     accountType: string
 ): Promise<classroomStatusVerificationType> => {
-    const classroom: Classroom | null = await getClassroom(classroomId)
-    const user: User | null = await getUser(userId)
     const group: Group | null | undefined = user?.Group
     const classroomStatus: number | undefined = classroom?.status.id
     const groupTaken: ShortClassroom | null | undefined = group?.Taken
@@ -69,24 +78,14 @@ const isClassroomStatusVerified = async (
                 return verifiedStatusResponse
             }
 
-            if (isClassroomTakenByGroup(classroomId, groupTaken?.id)) {
+            if (isClassroomTakenByGroup(classroom.id, groupTaken?.id)) {
                 return verifiedStatusResponse
             }
 
-            if (
-                isClassroomReservedByGroupAndNotBusy(
-                    classroomId,
-                    group?.Reserved?.id,
-                    classroomStatus
-                )
-            ) {
-                return verifiedStatusResponse
-            }
-
-            if (isClassroomReservedByGroup(classroomId, groupReserved?.id)) {
+            if (isClassroomReservedByGroup(classroom.id, groupReserved?.id)) {
                 return verifiedStatusResponse
             } else {
-                return classroomIsNotReservedByGroup
+                return classroomIsNeitherTakenOrReservedByGroup
             }
         case ClassroomStatusEnum[ClassroomStatusEnum.busy]:
             if (
@@ -100,7 +99,7 @@ const isClassroomStatusVerified = async (
 
             if (
                 isClassroomReservedByGroupAndNotBusy(
-                    classroomId,
+                    classroom.id,
                     groupReserved?.id,
                     classroomStatus
                 ) &&

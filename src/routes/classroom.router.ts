@@ -20,6 +20,15 @@ export const classroomRouter = express.Router()
 classroomRouter.get('/', authorize, ClassroomController.listClassrooms)
 
 /**
+ * GET: Grouped list of all classrooms
+ */
+classroomRouter.get(
+    '/grouped',
+    authorize,
+    ClassroomController.groupedClassrooms
+)
+
+/**
  * POST: Add new classroom
  * Params: classroom, title, description, managedById (optional)
  * Allowed account types: admin
@@ -89,3 +98,8 @@ classroomRouter.patch(
     classroomStatusVerification,
     ClassroomController.changeClassroomStatus
 )
+
+/**
+ * GET: Get classroom by ID
+ */
+classroomRouter.get('/:id', authorize, ClassroomController.getClassroom)

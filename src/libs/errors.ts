@@ -45,6 +45,11 @@ export const loadProfilePictureError: JsonResponse = {
     error: 1
 }
 
+export const fileNotExistError: JsonResponse = {
+    result: 'Zdjęcie nie istnieje',
+    error: 1
+}
+
 export const deactivateKeyError: JsonResponse = {
     result: 'Wystąpił błąd podczas deaktywacji klucza',
     error: 1
@@ -132,5 +137,15 @@ export const userIsAMemberOfOtherGroupError: JsonResponse = {
 
 export const getMembersListError: JsonResponse = {
     result: 'Wystąpił błąd podczas pobierania danych',
+    error: 1
+}
+
+export const leaveGroup: JsonResponse = {
+    result: 'Wystąpił błąd podczas opuszczania grupy',
+    error: 1
+}
+
+export const classroomNotFoundError: JsonResponse = {
+    result: 'Nie odnaleziono podanej klasy',
     error: 1
 }

@@ -37,10 +37,10 @@ model Classroom {
   description  String    @db.VarChar(500)
   status       Status    @relation(fields: [statusId], references: [id])
   statusId     Int       @default(1)
-  reservedBy   Group?    @relation(name: "reserved", fields: [reservedById], references: [id])
+  reservedBy   Group?    @relation(name: "reserved", fields: [reservedById], references: [id], onDelete: SetNull)
   reservedById Int?      @unique
   reservedAt   DateTime?
-  takenBy      Group?    @relation(name: "taken", fields: [takenById], references: [id])
+  takenBy      Group?    @relation(name: "taken", fields: [takenById], references: [id], onDelete: SetNull)
   takenById    Int?      @unique
   takenAt      DateTime?
   deleted      Boolean   @default(false)
@@ -52,7 +52,7 @@ model Info {
   id        Int      @id @default(autoincrement())
   openDay   OpenDay  @relation(fields: [openDayId], references: [id])
   openDayId Int
-  content   String
+  content   String   @db.Text
   deleted   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,19 +70,26 @@ model Key {
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
-  openDay     OpenDay  @relation(fields: [openDayId], references: [id])
-  openDayId   Int
-  dish        Dish     @relation(fields: [dishId], references: [id])
-  dishId      Int
-  amount      Int
-  comment     String?  @db.VarChar(255)
-  status      Status   @relation(fields: [statusId], references: [id])
-  statusId    Int      @default(4)
-  orderedBy   User     @relation("orders", fields: [orderedById], references: [id])
-  orderedById Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            Int             @id @default(autoincrement())
+  openDay       OpenDay         @relation(fields: [openDayId], references: [id])
+  openDayId     Int
+  comment       String?         @db.VarChar(255)
+  status        Status          @relation(fields: [statusId], references: [id])
+  statusId      Int             @default(4)
+  orderedBy     User            @relation("orders", fields: [orderedById], references: [id])
+  orderedById   Int
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  OrderPosition OrderPosition[]
+}
+
+model OrderPosition {
+  id      Int   @id @default(autoincrement())
+  Order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId Int
+  dish    Dish  @relation(fields: [dishId], references: [id])
+  dishId  Int
+  amount  Int
 }
 
 model Status {
@@ -127,11 +134,11 @@ model Group {
 }
 
 model Dish {
-  id     Int     @id @default(autoincrement())
-  name   String  @db.VarChar(64)
-  cheese Boolean @default(false)
-  ham    Boolean @default(false)
-  Order  Order[]
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(64)
+  cheese        Boolean         @default(false)
+  ham           Boolean         @default(false)
+  OrderPosition OrderPosition[]
 }
 
 model Socket {
@@ -142,8 +149,10 @@ model Socket {
 }
 
 model GroupVisitedClassroom {
-  id          Int   @id @default(autoincrement())
-  Group       Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  id          Int    @id @default(autoincrement())
+  Group       Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId     Int
   classroomId Int
+  classroom   String
+  title       String
 }

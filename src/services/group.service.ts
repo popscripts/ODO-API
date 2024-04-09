@@ -3,6 +3,7 @@ import { db } from '@utils/db.server'
 import { AccountTypes } from '@libs/accountTypes'
 import { faker } from '@faker-js/faker'
 import { hashPassword } from '@utils/auth.helper'
+import { GroupVisitedClassroom } from '@customTypes/classroom.type'
 
 export const getGroups = async (openDayId: number): Promise<Group[] | null> => {
     return db.group.findMany({
@@ -24,7 +25,8 @@ export const getGroups = async (openDayId: number): Promise<Group[] | null> => {
                             connected: true
                         }
                     },
-                    pictureName: true
+                    pictureName: true,
+                    accountType: true
                 }
             },
             description: true,
@@ -83,7 +85,8 @@ export const getGroup = async (id: number): Promise<Group | null> => {
                             connected: true
                         }
                     },
-                    pictureName: true
+                    pictureName: true,
+                    accountType: true
                 }
             },
             description: true,
@@ -189,6 +192,13 @@ export const updateGroup = async (
 }
 
 export const deleteGroup = async (id: number) => {
+    await db.user.deleteMany({
+        where: {
+            groupId: id,
+            accountTypeId: AccountTypes['temp']
+        }
+    })
+
     return db.group.delete({
         where: {
             id
@@ -228,20 +238,49 @@ export const isUserMemberOfGroup = async (
 
 export const addGroupVisitedClassroom = async (
     groupId: number,
-    classroomId: number
+    classroomId: number,
+    classroom: string,
+    title: string
 ) => {
     return db.groupVisitedClassroom.create({
         data: {
             groupId,
-            classroomId
+            classroomId,
+            classroom,
+            title
         }
     })
 }
 
-export const getGroupVisitedClassrooms = async (groupId: number) => {
+export const getGroupVisitedClassroomsIds = async (groupId: number) => {
+    let classroomsIds = await db.groupVisitedClassroom.findMany({
+        where: {
+            groupId
+        },
+        select: {
+            classroomId: true
+        }
+    })
+
+    return classroomsIds
+        .map((classroomId) => {
+            return Object.values(classroomId)
+        })
+        .flat()
+}
+
+export const getGroupVisitedClassrooms = async (
+    groupId: number
+): Promise<GroupVisitedClassroom[]> => {
     return db.groupVisitedClassroom.findMany({
         where: {
             groupId
+        },
+        select: {
+            groupId: true,
+            classroomId: true,
+            classroom: true,
+            title: true
         }
     })
 }
@@ -249,10 +288,11 @@ export const getGroupVisitedClassrooms = async (groupId: number) => {
 export const deleteGroupVisitedClassroom = async (
     groupId: number,
     classroomId: number
-) => {
-    return db.groupVisitedClassroom.deleteMany({
+): Promise<void> => {
+    await db.groupVisitedClassroom.deleteMany({
         where: {
-            AND: [{ groupId }, { classroomId }]
+            groupId,
+            classroomId
         }
     })
 }
@@ -270,7 +310,10 @@ export const isClassroomAlreadyVisited = async (
     return !!isVisited
 }
 
-export const isUserMemberOfAnyGroup = async (id: number): Promise<boolean> => {
+export const isUserMemberOfAnyGroup = async (
+    id: number,
+    groupId: number
+): Promise<boolean> => {
     if (id === 0) {
         return false
     }
@@ -278,14 +321,14 @@ export const isUserMemberOfAnyGroup = async (id: number): Promise<boolean> => {
     const isNotAMember: number = await db.user.count({
         where: {
             id,
-            groupId: null
+            OR: [{ groupId: null }, { groupId }]
         }
     })
 
     return !isNotAMember
 }
 
-export const getMembersList = async (): Promise<Member[]> => {
+export const getMemberList = async (): Promise<Member[]> => {
     return db.user.findMany({
         select: {
             id: true,
@@ -293,5 +336,27 @@ export const getMembersList = async (): Promise<Member[]> => {
             groupId: true
         },
         orderBy: [{ groupId: 'asc' }, { name: 'asc' }]
+    })
+}
+
+export const getNumberOfMembers = async (groupId: number) => {
+    return db.user.count({
+        where: {
+            groupId,
+            accountTypeId: {
+                not: AccountTypes['temp']
+            }
+        }
+    })
+}
+
+export const leaveGroup = async (id: number) => {
+    return db.user.update({
+        where: {
+            id
+        },
+        data: {
+            groupId: null
+        }
     })
 }
