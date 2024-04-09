@@ -43,7 +43,10 @@ const stream = {
 }
 
 const skip = (request: any) => {
-    return request.originalUrl.startsWith('/api/dynamic-content')
+    return (
+        request.originalUrl.startsWith('/api/dynamic-content') ||
+        request.originalUrl.startsWith('/static')
+    )
 }
 
 morgan.token('date', (req, res, tz) => {

@@ -35,19 +35,11 @@ export const logOutSocket = async (socket: Socket): Promise<void> => {
     }
 }
 
-export const joinRoom = (
-    socket: Socket,
-    data: SocketUserData,
-    error: Error
-): void => {
-    if (error) {
-        logger.error(error.message)
-    } else {
+export const joinRoom = (socket: Socket, data: SocketUserData): void => {
+    try {
         socket.join(data.accountType)
-        logger.log(
-            'socket',
-            `User with ID ${data.id} joined room '${data.accountType}'`
-        )
+    } catch (error: any) {
+        logger.error(error.message)
     }
 }
 

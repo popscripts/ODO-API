@@ -21,9 +21,9 @@ export const ioConnectionConfig = (app: Express, io: Server): void => {
             socketEventLogger(event, socket, next)
         })
 
-        socket.on('joinRoom', (data, err) => {
+        socket.on('joinRoom', (data) => {
             registerSocketMiddleware(data, socket).then(() => {
-                SocketController.joinRoom(socket, data, err)
+                SocketController.joinRoom(socket, data)
             })
         })
 

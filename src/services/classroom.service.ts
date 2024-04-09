@@ -7,7 +7,8 @@ export const listClassrooms = async (
 ): Promise<Classroom[]> => {
     return db.classroom.findMany({
         where: {
-            openDayId
+            openDayId,
+            deleted: false
         },
         select: {
             id: true,
@@ -92,7 +93,8 @@ export const getClassroomsByStatus = async (
             id: {
                 notIn: groupVisitedClassrooms
             },
-            statusId: status
+            statusId: status,
+            deleted: false
         },
         select: {
             id: true,
@@ -256,7 +258,8 @@ export const listClassroomsByStatus = async (
             openDayId,
             status: {
                 name: status
-            }
+            },
+            deleted: false
         },
         select: {
             id: true,
@@ -333,7 +336,8 @@ export const listClassroomsByStatus = async (
 export const getClassroom = async (id: number): Promise<Classroom | null> => {
     return db.classroom.findUnique({
         where: {
-            id
+            id,
+            deleted: false
         },
         select: {
             id: true,
