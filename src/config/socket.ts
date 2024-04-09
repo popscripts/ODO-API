@@ -7,7 +7,10 @@ import { Express, NextFunction, Request, Response } from 'express'
 export const createSocketServer = (): Server => {
     return new Server({
         cors: {
-            origin: process.env.EXPO_URI
+            credentials: true,
+            origin: (_, callback) => {
+                callback(null, true)
+            }
         }
     })
 }
@@ -18,9 +21,9 @@ export const ioConnectionConfig = (app: Express, io: Server): void => {
             socketEventLogger(event, socket, next)
         })
 
-        socket.on('joinRoom', (data, err) => {
+        socket.on('joinRoom', (data) => {
             registerSocketMiddleware(data, socket).then(() => {
-                SocketController.joinRoom(socket, data, err)
+                SocketController.joinRoom(socket, data)
             })
         })
 

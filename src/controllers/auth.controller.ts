@@ -69,13 +69,15 @@ export const login = async (
         const refreshToken: string = AuthHelper.generateRefreshToken(userData)
 
         response.cookie('JWT', accessToken, {
-            httpOnly: true,
-            sameSite: 'none'
+            httpOnly: false,
+            sameSite: 'lax',
+            expires: new Date(Date.now() + 60 * 60 * 1000)
         })
 
         response.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            sameSite: 'none'
+            httpOnly: false,
+            sameSite: 'lax',
+            expires: new Date(Date.now() + 60 * 120 * 1000)
         })
 
         return response.status(200).json(Callback.login)

@@ -39,7 +39,14 @@ healthcheck().then(() => {
 
     ioConnectionConfig(app, io)
 
-    app.use(cors())
+    app.use(
+        cors({
+            credentials: true,
+            origin: (_, callback) => {
+                callback(null, true)
+            }
+        })
+    )
     app.use(
         fileUpload({
             createParentPath: true,
