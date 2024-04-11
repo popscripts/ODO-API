@@ -45,7 +45,9 @@ const stream = {
 const skip = (request: any) => {
     return (
         request.originalUrl.startsWith('/api/dynamic-content') ||
-        request.originalUrl.startsWith('/static')
+        request.originalUrl.startsWith('/static') ||
+        (request.originalUrl.startsWith('/api/auth/picture') &&
+            request.method === 'GET')
     )
 }
 

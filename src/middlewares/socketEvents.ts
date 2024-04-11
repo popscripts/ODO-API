@@ -9,6 +9,11 @@ export const registerSocketMiddleware = async (
     socket: Socket
 ): Promise<void> => {
     try {
+        if (!data.id) {
+            logger.log('socket', 'User ID not provided')
+            return
+        }
+
         if (!(await isSocketRegistered(socket.id))) {
             await registerUserSocket(socket, data.id)
         }

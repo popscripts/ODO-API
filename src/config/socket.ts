@@ -11,7 +11,8 @@ export const createSocketServer = (): Server => {
             origin: (_, callback) => {
                 callback(null, true)
             }
-        }
+        },
+        connectionStateRecovery: {}
     })
 }
 
