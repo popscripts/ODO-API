@@ -7,12 +7,14 @@ import fs from 'fs'
 export const upload = async (
     picture: UploadedFile,
     id: number
-): Promise<void> => {
+): Promise<string> => {
     await removeOldPhoto(id)
     const extension: string = getExtension(picture)
     const pictureName: string = generatePictureName(8, extension)
     await saveProfilePicture(picture, pictureName)
     await AuthService.saveProfilePictureToDatabase(id, pictureName)
+
+    return pictureName
 }
 
 const saveProfilePicture = async (

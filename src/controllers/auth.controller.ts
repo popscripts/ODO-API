@@ -205,8 +205,8 @@ export const updateProfilePicture = async (
 ): Promise<Response> => {
     try {
         const picture: UploadedFile = request.files!.picture as UploadedFile
-        await upload(picture, request.user.id)
-        return response.status(201).json(Callback.savePhoto)
+        const pictureName: string = await upload(picture, request.user.id)
+        return response.status(201).json({ result: pictureName, error: 0 })
     } catch (error: any) {
         logger.error(`500 | ${error}`)
         return response.status(500).json(Error.updateProfilePictureError)
@@ -218,7 +218,7 @@ export const getPicture = async (
     response: Response
 ): Promise<void | Response> => {
     try {
-        const picturePath: string = './uploads/' + request.params.id + '.png'
+        const picturePath: string = './uploads/' + request.params.id
 
         if (!fs.existsSync(picturePath)) {
             return response.status(404).json(Error.fileNotExistError)
