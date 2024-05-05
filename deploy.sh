@@ -3,12 +3,9 @@ GREEN="\e[32m"
 ENDCOLOR="\e[0m"
 
 echo -e "${GREEN}Install packages.${ENDCOLOR}"
-if [ ! -d node_modules ]; then
-  yarn
-  yarn build
-  cd ../
-fi
-
+yarn
+yarn build
+  
 clear
 echo -e "${GREEN}Clone ODO-MANAGEMENT repo.${ENDCOLOR}"
 if [ ! -d ODO-MANAGEMENT/build ]; then
