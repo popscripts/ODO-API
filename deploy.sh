@@ -1,6 +1,6 @@
 #!/bin/bash
 GREEN="\e[32m"
-YELLOW="\e[33"
+YELLOW="\e[33m"
 ENDCOLOR="\e[0m"
 
 echo -e "${YELLOW}[Install pm2.]${ENDCOLOR}"
@@ -28,5 +28,5 @@ npm run build
 
 cd ../
 
-echo -e "${GREEN}Copy ODO-MANAGEMENT build files.${ENDCOLOR}"
+echo -e "${GREEN}[Copy ODO-MANAGEMENT build files.]${ENDCOLOR}"
 cp -a ODO-MANAGEMENT/build/. public
