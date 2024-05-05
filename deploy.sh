@@ -1,21 +1,32 @@
 #!/bin/bash
 GREEN="\e[32m"
+YELLOW="\e[33"
 ENDCOLOR="\e[0m"
 
-echo -e "${GREEN}Install packages.${ENDCOLOR}"
+echo -e "${YELLOW}[Install pm2.]${ENDCOLOR}"
+yarn add pm2
+
+echo -e "${YELLOW}[Install ODO-API packages.]${ENDCOLOR}"
 yarn
 yarn build
   
-clear
-echo -e "${GREEN}Clone ODO-MANAGEMENT repo.${ENDCOLOR}"
-if [ ! -d ODO-MANAGEMENT/build ]; then
+if [ ! -d ODO-MANAGEMENT ]; then
+  echo -e "${GREEN}[Clone ODO-MANAGEMENT repo.]${ENDCOLOR}"
   git clone https://github.com/popscripts/ODO-MANAGEMENT.git
   cd ODO-MANAGEMENT
-  git checkout deploy
-  cd ../
+else 
+  echo -e "${GREEN}[Pull ODO-MANAGEMENT repo.]${ENDCOLOR}"
+  cd ODO-MANAGEMENT
+  git pull
 fi
 
-clear
-echo `ls`
+echo -e "${GREEN}[Install ODO-MANAGEMENT packages.]${ENDCOLOR}"
+npm i
+
+echo -e "${GREEN}[Build ODO-MANAGEMENT app.]${ENDCOLOR}"
+npm run build
+
+cd ../
+
 echo -e "${GREEN}Copy ODO-MANAGEMENT build files.${ENDCOLOR}"
 cp -a ODO-MANAGEMENT/build/. public
