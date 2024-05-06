@@ -14,9 +14,11 @@ if [ ! -d ODO-MANAGEMENT ]; then
   echo -e "${GREEN}[Clone ODO-MANAGEMENT repo.]${ENDCOLOR}"
   git clone https://github.com/popscripts/ODO-MANAGEMENT.git
   cd ODO-MANAGEMENT
+  git checkout deploy
 else 
   echo -e "${GREEN}[Pull ODO-MANAGEMENT repo.]${ENDCOLOR}"
   cd ODO-MANAGEMENT
+  git checkout deploy
   git pull
 fi
 
