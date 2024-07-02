@@ -5,3 +5,5 @@
 /uploads/
 /logs
 /public/
+coverage
+jest.config.js

@@ -5,7 +5,7 @@ import { NewClassroom } from '@customTypes/classroom.type'
 import { hashPassword } from '@utils/auth.helper'
 import { NewKey } from '@customTypes/key.type'
 
-const devSeed = async () => {
+export const devSeed = async () => {
     // Create random users
     await Promise.all(
         USERS.map(async (user: NewUser) => {

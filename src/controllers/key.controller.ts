@@ -5,6 +5,7 @@ import * as KeyType from '@customTypes/key.type'
 import * as KeyHelper from '@utils/key.helper'
 import * as Callback from '@libs/callbacks'
 import { logger } from '@config/logger'
+import { NewKey } from '@customTypes/key.type'
 
 export const listKeys = async (request: Request, response: Response) => {
     try {
@@ -18,7 +19,8 @@ export const listKeys = async (request: Request, response: Response) => {
 
 export const generateKey = async (request: Request, response: Response) => {
     try {
-        const newKey: KeyType.NewKey = KeyHelper.generateKey(request.user.id)
+        const newKey: NewKey = KeyHelper.generateKey(request.user.openDayId)
+
         await KeyService.createKey(newKey)
 
         return response.status(201).json(Callback.createKey)

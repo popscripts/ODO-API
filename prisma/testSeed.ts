@@ -1,7 +1,7 @@
-import { db } from '@utils/db.server'
-import { Dish } from '@customTypes/buffet.type'
-import { Status } from '@customTypes/status.type'
-import { AccountType } from '@customTypes/auth.type'
+import { Status } from '../src/types/status.type'
+import { db } from '../src/utils/db.server'
+import { AccountType } from '../src/types/auth.type'
+import { Dish } from '../src/types/buffet.type'
 
 export const seed = async () => {
     try {
@@ -86,5 +86,3 @@ const getDishes = (): Array<Dish> => {
         { id: 3, name: 'toastWithCheeseAndHam', ham: true, cheese: true }
     ]
 }
-
-seed()
